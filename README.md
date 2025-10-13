@@ -19,6 +19,12 @@
 - **レベルシステム**: 経験値を貯めてレベルアップ
 - **毎日プレイ**: 日替わりでイベントに挑戦可能
 
+## 🌐 ライブデモ
+
+**本番環境**: [https://toru830.github.io/shachipoke/](https://toru830.github.io/shachipoke/)
+
+**診断テスト**: [https://toru830.github.io/shachipoke/test-diagnosis.html](https://toru830.github.io/shachipoke/test-diagnosis.html)
+
 ## 🚀 セットアップ
 
 ### 必要要件
