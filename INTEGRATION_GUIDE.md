@@ -2,7 +2,7 @@
 
 ## 概要
 
-社畜診断サイト（https://shindan.syachiku-life.com/）からシャチポケへの連携システムです。
+社畜診断サイト（https://shindan.syachiku-life.com/）からシャチポケ（https://shachipoke.syachiku-life.com/）への連携システムです。
 診断結果をそのままキャラクターとして受け取って、育成ゲームを開始できます。
 
 ## 📋 連携データ形式

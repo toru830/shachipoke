@@ -21,9 +21,11 @@
 
 ## 🌐 ライブデモ
 
-**本番環境**: [https://toru830.github.io/shachipoke/](https://toru830.github.io/shachipoke/)
+**本番環境**: [https://shachipoke.syachiku-life.com/](https://shachipoke.syachiku-life.com/)
 
-**診断テスト**: [https://toru830.github.io/shachipoke/test-diagnosis.html](https://toru830.github.io/shachipoke/test-diagnosis.html)
+**診断テスト**: [https://shachipoke.syachiku-life.com/test-diagnosis.html](https://shachipoke.syachiku-life.com/test-diagnosis.html)
+
+**GitHub Pages**: [https://toru830.github.io/shachipoke/](https://toru830.github.io/shachipoke/)
 
 ## 🚀 セットアップ
 
