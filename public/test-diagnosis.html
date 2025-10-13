@@ -242,7 +242,7 @@
             if (!selectedCharacter) return;
 
             const diagnosisResult = {
-                id: crypto.randomUUID(),
+                id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
                 name: selectedCharacter.name,
                 type: selectedCharacter.type,
                 description: `診断結果: ${selectedCharacter.name}`,

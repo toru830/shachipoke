@@ -49,7 +49,7 @@ export const getDiagnosisFromURL = (): DiagnosisResult | null => {
     }
     
     return {
-      id: decoded.id || crypto.randomUUID(),
+      id: decoded.id || `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       name: decoded.name,
       type: decoded.type,
       description: decoded.description || '',
@@ -89,7 +89,7 @@ export const createSampleDiagnosis = (iconId: number = 1): DiagnosisResult => {
   ];
 
   return {
-    id: crypto.randomUUID(),
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: sampleNames[iconId - 1] || `社畜${iconId}号`,
     type: sampleTypes[Math.floor(Math.random() * sampleTypes.length)],
     description: `診断結果: ${sampleNames[iconId - 1] || `社畜${iconId}号`}`,

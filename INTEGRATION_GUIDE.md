@@ -68,7 +68,7 @@ const diagnosisResult = {
 function getDiagnosisResult() {
   // 診断ロジック...
   const result = {
-    id: crypto.randomUUID(),
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: "新米社畜くん",
     type: "新入社員",
     description: "あなたは新米社畜です。これからが本番！",

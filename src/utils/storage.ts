@@ -37,7 +37,7 @@ export const getCharacterFromURL = (): Character | null => {
     
     // 基本的な初期キャラクターデータを作成
     return {
-      id: decoded.id || crypto.randomUUID(),
+      id: decoded.id || `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       name: decoded.name || '名無しの社畜',
       type: decoded.type || '新入社員',
       level: 1,
@@ -66,7 +66,7 @@ export const getCharacterFromURL = (): Character | null => {
 // デモ用のデフォルトキャラクター作成
 export const createDefaultCharacter = (): Character => {
   return {
-    id: crypto.randomUUID(),
+    id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: '新米社畜くん',
     type: '新入社員',
     level: 1,

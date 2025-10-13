@@ -132,7 +132,7 @@ http://<PCのIPアドレス>:5173/
 ```javascript
 // キャラクターデータを作成
 const characterData = {
-  id: crypto.randomUUID(), // ユニークID
+  id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`, // ユニークID
   name: "診断結果の名前",
   type: "新入社員", // または他のタイプ
   stats: {
