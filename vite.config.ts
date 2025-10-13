@@ -9,6 +9,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+      },
       manifest: {
         name: 'シャチポケ - 社畜育成ゲーム',
         short_name: 'シャチポケ',
@@ -16,8 +19,27 @@ export default defineConfig({
         theme_color: '#1e40af',
         background_color: '#ffffff',
         display: 'standalone',
+        start_url: '/shachipoke/',
+        scope: '/shachipoke/',
+        icons: [
+          {
+            src: '/shachipoke/vite.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
+          }
+        ]
       }
     })
   ],
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  }
 })
 
