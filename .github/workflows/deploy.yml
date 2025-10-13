@@ -26,7 +26,7 @@ jobs:
         run: npm ci
         
       - name: Build
-        run: npm run build
+        run: npm run build -- --base /shachipoke/
         
       - name: Add CNAME
         run: echo "shachipoke.syachiku-life.com" > ./dist/CNAME
