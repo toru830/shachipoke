@@ -40,6 +40,9 @@ jobs:
         with:
           path: './dist'
 
+      - name: Add CNAME
+        run: echo "shachipoke.syachiku-life.com" > ./dist/CNAME
+
   deploy:
     environment:
       name: github-pages
