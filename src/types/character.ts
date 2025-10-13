@@ -22,7 +22,10 @@ export interface Character {
 
 export interface GameState {
   character: Character | null;
+  characters: Character[]; // 全キャラクター（編成用）
+  activeCharacterId: string | null; // 現在選択中のキャラクターID
   shachiCoins: number; // シャチコイン
+  inventory?: Record<string, number>; // 所持アイテムID -> 個数
   todayEvents: {
     bossQA: boolean;
     officeHarassment: boolean;
@@ -48,5 +51,13 @@ export interface EventOption {
   reward: number; // シャチコイン報酬
   expGain: number; // 経験値
   feedback: string; // フィードバックメッセージ
+}
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  price: number; // 価格（シャチ）
+  description: string;
+  emoji?: string;
 }
 

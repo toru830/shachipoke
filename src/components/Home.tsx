@@ -6,9 +6,10 @@ interface HomeProps {
   gameState: GameState;
   onStartEvent: (type: 'boss' | 'office' | 'arrival') => void;
   onOpenUpgrade: () => void;
+  onOpenShop: () => void;
 }
 
-const Home = ({ gameState, onStartEvent, onOpenUpgrade }: HomeProps) => {
+const Home = ({ gameState, onStartEvent, onOpenUpgrade, onOpenShop }: HomeProps) => {
   const { character, shachiCoins, todayEvents, lastPlayDate } = gameState;
   
   if (!character) return null;
@@ -87,6 +88,12 @@ const Home = ({ gameState, onStartEvent, onOpenUpgrade }: HomeProps) => {
             className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 active:scale-95"
           >
             ✨ 強化する
+          </button>
+          <button
+            onClick={onOpenShop}
+            className="w-full mt-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all transform hover:scale-105 active:scale-95"
+          >
+            🛒 アイテム屋さん
           </button>
         </div>
 

@@ -12,8 +12,12 @@ import Home from './components/Home';
 import EventScreen from './components/EventScreen';
 import UpgradeScreen from './components/UpgradeScreen';
 import Welcome from './components/Welcome';
+import ShopScreen from './components/ShopScreen';
+import FormationScreen from './components/FormationScreen';
+import TrainingScreen from './components/TrainingScreen';
+import BottomNavigation from './components/BottomNavigation';
 
-type Screen = 'welcome' | 'home' | 'event' | 'upgrade';
+type Screen = 'welcome' | 'home' | 'event' | 'upgrade' | 'shop' | 'training' | 'formation';
 
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -31,7 +35,10 @@ function App() {
         const character = convertDiagnosisToCharacter(diagnosisResult);
         const newGameState: GameState = {
           character: character,
+          characters: [character],
+          activeCharacterId: character.id,
           shachiCoins: 50, // 診断連携ボーナス
+          inventory: {},
           todayEvents: {
             bossQA: false,
             officeHarassment: false,
@@ -54,7 +61,10 @@ function App() {
         // URLからキャラクターが取得できた場合、新規ゲーム開始
         const newGameState: GameState = {
           character: urlCharacter,
+          characters: [urlCharacter],
+          activeCharacterId: urlCharacter.id,
           shachiCoins: 0,
+          inventory: {},
           todayEvents: {
             bossQA: false,
             officeHarassment: false,
@@ -73,6 +83,17 @@ function App() {
       // URLにデータがない場合、既存のセーブデータを確認
       const savedState = loadGameState();
       if (savedState) {
+        // 既存データの互換性を保つ
+        if (!savedState.characters) {
+          savedState.characters = savedState.character ? [savedState.character] : [];
+        }
+        if (!savedState.activeCharacterId && savedState.character) {
+          savedState.activeCharacterId = savedState.character.id;
+        }
+        if (!savedState.inventory) {
+          savedState.inventory = {};
+        }
+        
         // 日付が変わっていたらイベントリセット
         const today = getTodayDateString();
         if (savedState.lastPlayDate !== today) {
@@ -86,9 +107,13 @@ function App() {
         setCurrentScreen('home');
       } else {
         // セーブデータもない場合、デフォルトキャラクターで開始
+        const defaultCharacter = createDefaultCharacter();
         const newGameState: GameState = {
-          character: createDefaultCharacter(),
+          character: defaultCharacter,
+          characters: [defaultCharacter],
+          activeCharacterId: defaultCharacter.id,
           shachiCoins: 50, // 初回ボーナス
+          inventory: {},
           todayEvents: {
             bossQA: false,
             officeHarassment: false,
@@ -132,6 +157,20 @@ function App() {
     setCurrentScreen('home');
   };
 
+  const openShop = () => setCurrentScreen('shop');
+  const closeShop = (updated: GameState) => { setGameState(updated); setCurrentScreen('home'); };
+
+  const closeTraining = (updated: GameState) => { setGameState(updated); setCurrentScreen('home'); };
+  const closeFormation = (updated: GameState) => { setGameState(updated); setCurrentScreen('home'); };
+
+  const navigateToScreen = (screen: string) => {
+    if (screen === 'event' && gameState) {
+      // イベント画面は特別処理
+      return;
+    }
+    setCurrentScreen(screen as Screen);
+  };
+
   const startGame = () => {
     setCurrentScreen('home');
   };
@@ -154,6 +193,7 @@ function App() {
           gameState={gameState}
           onStartEvent={startEvent}
           onOpenUpgrade={openUpgrade}
+          onOpenShop={openShop}
         />
       )}
       {currentScreen === 'event' && eventType && (
@@ -168,6 +208,23 @@ function App() {
         <UpgradeScreen
           gameState={gameState}
           onClose={closeUpgrade}
+        />
+      )}
+      {currentScreen === 'shop' && (
+        <ShopScreen gameState={gameState} onClose={closeShop} />
+      )}
+      {currentScreen === 'training' && (
+        <TrainingScreen gameState={gameState} onClose={closeTraining} />
+      )}
+      {currentScreen === 'formation' && (
+        <FormationScreen gameState={gameState} onClose={closeFormation} />
+      )}
+
+      {/* ボトムナビゲーション */}
+      {currentScreen !== 'welcome' && gameState && (
+        <BottomNavigation 
+          currentScreen={currentScreen} 
+          onNavigate={navigateToScreen} 
         />
       )}
     </div>
