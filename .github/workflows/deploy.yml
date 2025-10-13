@@ -1,18 +1,14 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches: [ main ]
-
 permissions:
   contents: write
   pages: write
   id-token: write
-
 concurrency:
   group: "pages"
   cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,6 +28,9 @@ jobs:
       - name: Build
         run: npm run build
         
+      - name: Add CNAME
+        run: echo "shachipoke.syachiku-life.com" > ./dist/CNAME
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
@@ -39,10 +38,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
-
-      - name: Add CNAME
-        run: echo "shachipoke.syachiku-life.com" > ./dist/CNAME
-
+          
   deploy:
     environment:
       name: github-pages
