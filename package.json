@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": "https://toru830.github.io/shachipoke",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -31,4 +32,3 @@
     "vite-plugin-pwa": "^0.17.4"
   }
 }
-
