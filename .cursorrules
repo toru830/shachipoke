@@ -1,0 +1,30 @@
+# Shachipoke プロジェクトルール
+
+## ビルド・デプロイルール
+1. カスタムドメイン (shachipoke.syachiku-life.com) を使用
+2. vite.config.ts の base は常に '/' を維持
+3. index.html 内のパスは相対パス (./) を使用
+4. /shachipoke/ パスは絶対に使用しない
+
+## 修正時のルール
+1. パス関連の修正時は必ず base: '/' を確認
+2. アセットパスは /assets/ で始まることを確認
+3. 完全クリーンビルドが必要な場合は以下を実行:
+   - Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+   - Remove-Item -Recurse -Force node_modules\.vite -ErrorAction SilentlyContinue
+   - npm run build
+
+## デプロイルール
+1. GitHub Actions で自動デプロイ
+2. カスタムドメイン用の CNAME ファイルを dist/ に配置
+3. デプロイ後は必ず shachipoke.syachiku-life.com で動作確認
+
+## 技術スタック
+- React + TypeScript + Vite
+- TailwindCSS
+- GitHub Pages + カスタムドメイン
+- PWA対応
+
+## 注意事項
+- crypto.randomUUID() は使用禁止 (GitHub Pages環境でエラー)
+- 代わりに `${Date.now()}-${Math.random().toString(36).substring(2, 11)}` を使用
