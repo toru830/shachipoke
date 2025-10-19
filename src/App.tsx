@@ -8,6 +8,7 @@ import {
 } from './utils/storage';
 import { getDiagnosisFromURL, convertDiagnosisToCharacter } from './utils/diagnosisConverter';
 import { getTodayDateString } from './utils/gameLogic';
+import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
 import Home from './components/Home';
 import EventScreen from './components/EventScreen';
 import UpgradeScreen from './components/UpgradeScreen';
@@ -16,18 +17,48 @@ import ShopScreen from './components/ShopScreen';
 import FormationScreen from './components/FormationScreen';
 import TrainingScreen from './components/TrainingScreen';
 import BottomNavigation from './components/BottomNavigation';
+import IntroVideo from './components/IntroVideo';
 
-type Screen = 'welcome' | 'home' | 'event' | 'upgrade' | 'shop' | 'training' | 'formation';
+type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'upgrade' | 'shop' | 'training' | 'formation';
 
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('intro');
   const [eventType, setEventType] = useState<'boss' | 'office' | 'arrival' | null>(null);
 
   useEffect(() => {
     // 初回ロード時の処理
     const initGame = () => {
-      // まず診断サイトからのデータを取得試行
+      // まずURLパラメータから社畜診断のキャラクター情報を取得試行
+      const diagnosisChar = getCharacterFromUrl();
+      
+      if (diagnosisChar.fromShindan && diagnosisChar.characterId && diagnosisChar.characterName) {
+        // 社畜診断から来た場合の処理
+        const character = convertDiagnosisCharacterToCharacter(diagnosisChar);
+        if (character) {
+          const newGameState: GameState = {
+            character: character,
+            characters: [character],
+            activeCharacterId: character.id,
+            shachiCoins: 50, // 診断連携ボーナス
+            inventory: {},
+            todayEvents: {
+              bossQA: false,
+              officeHarassment: false,
+              earlyArrival: false,
+            },
+            lastPlayDate: '',
+            totalEvents: 0,
+            successCount: 0,
+          };
+          setGameState(newGameState);
+          saveGameState(newGameState);
+          setCurrentScreen('intro');
+          return;
+        }
+      }
+
+      // 次に従来の診断サイトからのデータを取得試行
       const diagnosisResult = getDiagnosisFromURL();
       
       if (diagnosisResult) {
@@ -50,7 +81,7 @@ function App() {
         };
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('welcome');
+        setCurrentScreen('intro');
         return;
       }
 
@@ -76,7 +107,7 @@ function App() {
         };
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('welcome');
+        setCurrentScreen('intro');
         return;
       }
 
@@ -125,7 +156,7 @@ function App() {
         };
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('welcome');
+        setCurrentScreen('intro');
       }
     };
 
@@ -175,6 +206,14 @@ function App() {
     setCurrentScreen('home');
   };
 
+  const completeIntro = () => {
+    if (gameState) {
+      setCurrentScreen('home');
+    } else {
+      setCurrentScreen('welcome');
+    }
+  };
+
   if (!gameState) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-200 flex items-center justify-center">
@@ -185,6 +224,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100">
+      {currentScreen === 'intro' && (
+        <IntroVideo onComplete={completeIntro} />
+      )}
       {currentScreen === 'welcome' && (
         <Welcome character={gameState.character!} onStart={startGame} />
       )}
@@ -221,7 +263,7 @@ function App() {
       )}
 
       {/* ボトムナビゲーション */}
-      {currentScreen !== 'welcome' && gameState && (
+      {currentScreen !== 'intro' && currentScreen !== 'welcome' && gameState && (
         <BottomNavigation 
           currentScreen={currentScreen} 
           onNavigate={navigateToScreen} 
