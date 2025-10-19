@@ -36,6 +36,16 @@ export const getCharacterFromURL = (): Character | null => {
       return null;
     }
 
+    // アイコンURLからキャラクターIDを抽出
+    let characterId: number | undefined;
+    if (iconUrl) {
+      // URLからキャラクターIDを抽出（例: .../005.png から 5 を抽出）
+      const match = iconUrl.match(/(\d{3})\.png/);
+      if (match) {
+        characterId = parseInt(match[1], 10);
+      }
+    }
+
     const character: Character = {
       id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       name: characterName,
@@ -54,6 +64,7 @@ export const getCharacterFromURL = (): Character | null => {
         style: 'default',
         emoji: '🧑‍💼',
         avatar: iconUrl || undefined,
+        characterId: characterId,
       },
       createdAt: new Date().toISOString(),
     };

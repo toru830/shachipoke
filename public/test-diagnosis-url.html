@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社畜診断URLテスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            display: inline-block;
+            background: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .test-button:hover {
+            background: #3730A3;
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>社畜診断URLテスト</h1>
+    
+    <div class="test-section">
+        <h2>テスト用URLパラメータ</h2>
+        <p>以下のボタンをクリックして、社畜診断からの遷移をテストできます。</p>
+        
+        <h3>キャラクター001（ピンクウサギ）</h3>
+        <div class="url-display">
+            ?char=001&name=ピンクウサギ&from=shindan
+        </div>
+        <a href="?char=001&name=ピンクウサギ&from=shindan" class="test-button" target="_blank">
+            ピンクウサギでテスト
+        </a>
+        
+        <h3>キャラクター005（心優しき社畜）</h3>
+        <div class="url-display">
+            ?char=005&name=心優しき社畜&from=shindan
+        </div>
+        <a href="?char=005&name=心優しき社畜&from=shindan" class="test-button" target="_blank">
+            心優しき社畜でテスト
+        </a>
+        
+        <h3>キャラクター010（バランサー社員）</h3>
+        <div class="url-display">
+            ?char=010&name=バランサー社員&from=shindan
+        </div>
+        <a href="?char=010&name=バランサー社員&from=shindan" class="test-button" target="_blank">
+            バランサー社員でテスト
+        </a>
+        
+        <h3>通常アクセス（パラメータなし）</h3>
+        <div class="url-display">
+            （パラメータなし）
+        </div>
+        <a href="?" class="test-button" target="_blank">
+            通常アクセステスト
+        </a>
+    </div>
+    
+    <div class="test-section">
+        <h2>実装内容</h2>
+        <ul>
+            <li>URLパラメータ（char, name, from）を解析</li>
+            <li>from=shindanの場合、指定キャラでゲーム開始</li>
+            <li>通常アクセスの場合は既存の処理を継続</li>
+            <li>キャラクターIDから適切なアイコンを表示</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>デバッグ情報</h2>
+        <p>ブラウザの開発者ツールのコンソールで、URLパラメータの解析結果を確認できます。</p>
+        <button onclick="showCurrentParams()" class="test-button">現在のURLパラメータを表示</button>
+        <div id="current-params" style="margin-top: 10px;"></div>
+    </div>
+    
+    <script>
+        function showCurrentParams() {
+            const params = new URLSearchParams(window.location.search);
+            const result = {
+                char: params.get('char'),
+                name: params.get('name'),
+                from: params.get('from'),
+                fromShindan: params.get('from') === 'shindan'
+            };
+            
+            document.getElementById('current-params').innerHTML = 
+                '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+        }
+        
+        // ページ読み込み時に現在のパラメータを表示
+        window.onload = function() {
+            showCurrentParams();
+        };
+    </script>
+</body>
+</html>
