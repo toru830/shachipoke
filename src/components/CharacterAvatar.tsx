@@ -4,9 +4,10 @@ interface CharacterAvatarProps {
   character: Character;
   size?: 'small' | 'medium' | 'large';
   className?: string;
+  style?: React.CSSProperties;
 }
 
-const CharacterAvatar = ({ character, size = 'medium', className = '' }: CharacterAvatarProps) => {
+const CharacterAvatar = ({ character, size = 'medium', className = '', style }: CharacterAvatarProps) => {
   const sizeClasses = {
     small: 'w-12 h-12 text-2xl',
     medium: 'w-20 h-20 text-4xl',
@@ -20,7 +21,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '' }: Charact
     return (
       <div 
         className={baseClasses}
-        style={{ backgroundColor: character.appearance.color }}
+        style={{ backgroundColor: character.appearance.color, ...style }}
       >
         <img 
           src={character.appearance.avatar} 
@@ -37,7 +38,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '' }: Charact
     return (
       <div 
         className={baseClasses}
-        style={{ backgroundColor: character.appearance.color }}
+        style={{ backgroundColor: character.appearance.color, ...style }}
       >
         <img 
           src={`./characters/${characterId}.png`}
