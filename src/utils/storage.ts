@@ -29,34 +29,36 @@ export const clearGameState = (): void => {
 export const getCharacterFromURL = (): Character | null => {
   try {
     const params = new URLSearchParams(window.location.search);
-    const charData = params.get('character');
+    const characterName = params.get('character');
+    const iconUrl = params.get('icon');
     
-    if (!charData) return null;
-    
-    const decoded = JSON.parse(decodeURIComponent(charData));
-    
-    // 基本的な初期キャラクターデータを作成
-    return {
-      id: decoded.id || `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      name: decoded.name || '名無しの社畜',
-      type: decoded.type || '新入社員',
+    if (!characterName) {
+      return null;
+    }
+
+    const character: Character = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+      name: characterName,
+      type: '診断結果',
       level: 1,
       exp: 0,
       expToNextLevel: 100,
       stats: {
-        stress: decoded.stats?.stress || 50,
-        communication: decoded.stats?.communication || 50,
-        endurance: decoded.stats?.endurance || 50,
-        luck: decoded.stats?.luck || 50,
+        stress: 50,
+        communication: 50,
+        endurance: 50,
+        luck: 50,
       },
       appearance: {
-        color: decoded.appearance?.color || '#3b82f6',
-        style: decoded.appearance?.style || 'default',
-        emoji: decoded.appearance?.emoji || undefined,
-        avatar: decoded.appearance?.avatar || undefined,
+        color: '#4F46E5',
+        style: 'default',
+        emoji: '🧑‍💼',
+        avatar: iconUrl || undefined,
       },
       createdAt: new Date().toISOString(),
     };
+
+    return character;
   } catch (error) {
     console.error('Failed to parse character from URL:', error);
     return null;

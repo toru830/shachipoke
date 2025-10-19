@@ -16,6 +16,7 @@ export interface Character {
     style: string; // 見た目のスタイル
     emoji?: string; // キャラクターの絵文字（社畜診断から）
     avatar?: string; // アバター画像URL（オプション）
+    characterId?: number; // 社畜診断のキャラクターID（001-016）
   };
   createdAt: string;
 }

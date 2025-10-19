@@ -40,12 +40,35 @@ const Home = ({ gameState, onStartEvent, onOpenUpgrade, onOpenShop }: HomeProps)
           </div>
 
           {/* キャラクター表示 */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
-            <div className="flex items-center gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200 relative overflow-hidden">
+            {/* 背景で動くキャラクターたち */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-2 left-4 animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }}>
+                <img src="./characters/001.png" alt="キャラクター1" className="w-8 h-8 opacity-30" />
+              </div>
+              <div className="absolute top-4 right-8 animate-pulse" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>
+                <img src="./characters/002.png" alt="キャラクター2" className="w-6 h-6 opacity-25" />
+              </div>
+              <div className="absolute bottom-4 left-8 animate-ping" style={{ animationDelay: '1s', animationDuration: '4s' }}>
+                <img src="./characters/003.png" alt="キャラクター3" className="w-7 h-7 opacity-20" />
+              </div>
+              <div className="absolute top-6 right-4 animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '2.5s' }}>
+                <img src="./characters/004.png" alt="キャラクター4" className="w-5 h-5 opacity-30" />
+              </div>
+              <div className="absolute bottom-2 right-12 animate-pulse" style={{ animationDelay: '2s', animationDuration: '3.5s' }}>
+                <img src="./characters/005.png" alt="キャラクター5" className="w-6 h-6 opacity-25" />
+              </div>
+              <div className="absolute top-8 left-12 animate-ping" style={{ animationDelay: '2.5s', animationDuration: '4.5s' }}>
+                <img src="./characters/006.png" alt="キャラクター6" className="w-5 h-5 opacity-20" />
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 relative z-10">
               <CharacterAvatar 
                 character={character} 
                 size="medium" 
-                className="flex-shrink-0"
+                className="flex-shrink-0 animate-pulse"
+                style={{ animationDuration: '2s' }}
               />
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-bold text-gray-800 truncate">

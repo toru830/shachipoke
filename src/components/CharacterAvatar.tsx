@@ -31,6 +31,23 @@ const CharacterAvatar = ({ character, size = 'medium', className = '' }: Charact
     );
   }
 
+  // 社畜診断のキャラクターアイコンを使用する場合
+  if (character.appearance.characterId) {
+    const characterId = character.appearance.characterId.toString().padStart(3, '0');
+    return (
+      <div 
+        className={baseClasses}
+        style={{ backgroundColor: character.appearance.color }}
+      >
+        <img 
+          src={`./characters/${characterId}.png`}
+          alt={character.name}
+          className="w-full h-full object-cover rounded-full"
+        />
+      </div>
+    );
+  }
+
   // 絵文字またはデフォルト絵文字を表示
   return (
     <div 
