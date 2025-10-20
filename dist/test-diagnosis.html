@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社畜診断テスト - シャチポケ連携</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .character-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+        .character-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+        .character-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .character-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #e5e7eb;
+        }
+        .character-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #374151;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .stats {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .stat-bar {
+            width: 100px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 社畜診断テスト</h1>
+        <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">
+            あなたの社畜タイプを診断して、シャチポケで育成を始めましょう！
+        </p>
+
+        <div class="character-grid" id="characterGrid">
+            <!-- キャラクターカードが動的に生成されます -->
+        </div>
+
+        <div class="stats" id="statsDisplay" style="display: none;">
+            <h3>📊 あなたの社畜ステータス</h3>
+            <div class="stat-item">
+                <span>💪 ストレス耐性</span>
+                <div class="stat-bar">
+                    <div class="stat-fill" id="stressBar"></div>
+                </div>
+                <span id="stressValue">50</span>
+            </div>
+            <div class="stat-item">
+                <span>💬 コミュ力</span>
+                <div class="stat-bar">
+                    <div class="stat-fill" id="commBar"></div>
+                </div>
+                <span id="commValue">50</span>
+            </div>
+            <div class="stat-item">
+                <span>⚡ 体力</span>
+                <div class="stat-bar">
+                    <div class="stat-fill" id="enduranceBar"></div>
+                </div>
+                <span id="enduranceValue">50</span>
+            </div>
+            <div class="stat-item">
+                <span>🍀 運</span>
+                <div class="stat-bar">
+                    <div class="stat-fill" id="luckBar"></div>
+                </div>
+                <span id="luckValue">50</span>
+            </div>
+        </div>
+
+        <button class="btn" id="startGameBtn" disabled>
+            🎮 シャチポケで育成開始！
+        </button>
+    </div>
+
+    <script>
+        // 社畜キャラクターデータ
+        const characters = [
+            { id: 1, name: "新米社畜くん", emoji: "😊", type: "新入社員", color: "#3b82f6", stats: { stress: 50, communication: 60, endurance: 70, luck: 40 } },
+            { id: 2, name: "疲れ切った社員", emoji: "😵", type: "中堅社員", color: "#6b7280", stats: { stress: 30, communication: 40, endurance: 20, luck: 60 } },
+            { id: 3, name: "燃え尽き症候群", emoji: "🤯", type: "ベテラン社員", color: "#dc2626", stats: { stress: 20, communication: 30, endurance: 10, luck: 80 } },
+            { id: 4, name: "完璧主義者", emoji: "😤", type: "管理職候補", color: "#7c3aed", stats: { stress: 90, communication: 70, endurance: 80, luck: 20 } },
+            { id: 5, name: "残業マスター", emoji: "🌙", type: "中堅社員", color: "#1f2937", stats: { stress: 90, communication: 70, endurance: 95, luck: 30 } },
+            { id: 6, name: "ストレス耐性MAX", emoji: "💪", type: "管理職", color: "#059669", stats: { stress: 100, communication: 80, endurance: 90, luck: 50 } },
+            { id: 7, name: "コミュ力不足", emoji: "😅", type: "新入社員", color: "#f59e0b", stats: { stress: 60, communication: 20, endurance: 70, luck: 70 } },
+            { id: 8, name: "運のない人", emoji: "😭", type: "フリーター出身", color: "#ef4444", stats: { stress: 40, communication: 50, endurance: 60, luck: 10 } },
+            { id: 9, name: "上司のペット", emoji: "🐶", type: "中堅社員", color: "#8b5cf6", stats: { stress: 80, communication: 90, endurance: 60, luck: 70 } },
+            { id: 10, name: "お局様のターゲット", emoji: "👵", type: "新入社員", color: "#ec4899", stats: { stress: 30, communication: 40, endurance: 50, luck: 20 } },
+            { id: 11, name: "朝活社畜", emoji: "🌅", type: "管理職候補", color: "#f97316", stats: { stress: 70, communication: 60, endurance: 85, luck: 60 } },
+            { id: 12, name: "夜型社畜", emoji: "🦉", type: "中堅社員", color: "#1e40af", stats: { stress: 60, communication: 50, endurance: 70, luck: 40 } },
+            { id: 13, name: "完璧な社畜", emoji: "✨", type: "管理職", color: "#10b981", stats: { stress: 95, communication: 95, endurance: 95, luck: 95 } },
+            { id: 14, name: "問題児社畜", emoji: "😈", type: "フリーター出身", color: "#dc2626", stats: { stress: 40, communication: 30, endurance: 40, luck: 90 } },
+            { id: 15, name: "影の実力者", emoji: "👤", type: "ベテラン社員", color: "#374151", stats: { stress: 85, communication: 60, endurance: 80, luck: 50 } },
+            { id: 16, name: "透明人間", emoji: "👻", type: "フリーター出身", color: "#6b7280", stats: { stress: 20, communication: 10, endurance: 30, luck: 90 } }
+        ];
+
+        let selectedCharacter = null;
+
+        // キャラクターグリッドを生成
+        function renderCharacterGrid() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = characters.map(char => `
+                <div class="character-card" data-id="${char.id}">
+                    <div class="character-icon" style="background-color: ${char.color}">
+                        ${char.emoji}
+                    </div>
+                    <div class="character-name">${char.name}</div>
+                </div>
+            `).join('');
+
+            // クリックイベントを追加
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.addEventListener('click', () => selectCharacter(parseInt(card.dataset.id)));
+            });
+        }
+
+        // キャラクター選択
+        function selectCharacter(id) {
+            selectedCharacter = characters.find(c => c.id === id);
+            
+            // 選択状態を更新
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-id="${id}"]`).classList.add('selected');
+
+            // ステータス表示を更新
+            updateStatsDisplay();
+            
+            // ボタンを有効化
+            document.getElementById('startGameBtn').disabled = false;
+        }
+
+        // ステータス表示を更新
+        function updateStatsDisplay() {
+            if (!selectedCharacter) return;
+
+            const stats = selectedCharacter.stats;
+            
+            document.getElementById('stressValue').textContent = stats.stress;
+            document.getElementById('commValue').textContent = stats.communication;
+            document.getElementById('enduranceValue').textContent = stats.endurance;
+            document.getElementById('luckValue').textContent = stats.luck;
+
+            document.getElementById('stressBar').style.width = `${stats.stress}%`;
+            document.getElementById('commBar').style.width = `${stats.communication}%`;
+            document.getElementById('enduranceBar').style.width = `${stats.endurance}%`;
+            document.getElementById('luckBar').style.width = `${stats.luck}%`;
+
+            document.getElementById('statsDisplay').style.display = 'block';
+        }
+
+        // ゲーム開始
+        function startGame() {
+            if (!selectedCharacter) return;
+
+            const diagnosisResult = {
+                id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+                name: selectedCharacter.name,
+                type: selectedCharacter.type,
+                description: `診断結果: ${selectedCharacter.name}`,
+                stats: selectedCharacter.stats,
+                appearance: {
+                    color: selectedCharacter.color,
+                    style: "default",
+                    iconId: selectedCharacter.id
+                }
+            };
+
+            const gameUrl = window.location.origin; // 同じドメインのシャチポケ
+            const encoded = encodeURIComponent(JSON.stringify(diagnosisResult));
+            window.location.href = `${gameUrl}/?diagnosis=${encoded}`;
+        }
+
+        // イベントリスナー
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+
+        // 初期化
+        renderCharacterGrid();
+    </script>
+</body>
+</html>
