@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
-import { shopItems, getShopItemsByCategory, ShopItem } from '../data/shopItems';
+import { getShopItemsByCategory, ShopItem } from '../data/shopItems';
 import { spendMoney, updateStat, addExp } from '../utils/gameLogic';
 
 interface ShopScreenProps {

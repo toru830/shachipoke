@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameState, Character } from './types/character';
+import { GameState } from './types/character';
 import { 
   loadGameState, 
   saveGameState, 
@@ -9,7 +9,6 @@ import {
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
 import { getDiagnosisFromURL, convertDiagnosisToCharacter } from './utils/diagnosisConverter';
-import { checkAchievements } from './data/achievements';
 import IntroVideo from './components/IntroVideo';
 import Home from './components/Home';
 import EventScreen from './components/EventScreen';
@@ -42,6 +41,12 @@ function App() {
             lastPlayDate: new Date().toISOString(),
             events: [],
             achievements: [],
+            settings: {
+              soundEnabled: true,
+              musicEnabled: true,
+              notificationsEnabled: true,
+              autoSave: true,
+            },
           };
           setGameState(newGameState);
           saveGameState(newGameState);
