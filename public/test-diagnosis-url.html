@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>診断URLテスト</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .button-group button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        #output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>シャチポケ 診断URLテスト</h1>
+
+    <div class="button-group">
+        <button onclick="goToShachipoke('001', 'ピンクウサギ')">キャラ001 (ピンクウサギ)</button>
+        <button onclick="goToShachipoke('005', '心優しき社畜')">キャラ005 (心優しき社畜)</button>
+        <button onclick="goToShachipoke('010', 'バランサー社員')">キャラ010 (バランサー社員)</button>
+        <button onclick="goToShachipoke('invalid', '無効なキャラ')">無効なキャラID</button>
+        <button onclick="goToShachipoke(null, '名前なし')">IDなし</button>
+    </div>
+
+    <p>現在のURL: <span id="currentUrl"></span></p>
+    <p>解析結果（コンソールも確認）:</p>
+    <pre id="output"></pre>
+
+    <script>
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        function goToShachipoke(characterId, characterName) {
+            const params = new URLSearchParams();
+            if (characterId) params.set('char', characterId);
+            if (characterName) params.set('name', characterName);
+            params.set('from', 'shindan');
+            
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}/?${params.toString()}`;
+            window.open(url, '_blank');
+        }
+
+        // URLパラメータを解析して表示 (デバッグ用)
+        const params = new URLSearchParams(window.location.search);
+        const char = params.get('char');
+        const name = params.get('name');
+        const from = params.get('from');
+
+        const output = document.getElementById('output');
+        output.textContent = `char: ${char}\nname: ${name}\nfrom: ${from}`;
+
+        console.log('Test Page URL Params:', { char, name, from });
+    </script>
+</body>
+</html>
