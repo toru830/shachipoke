@@ -1,157 +1,398 @@
-import React, { useState } from 'react';
-import { GameState } from '../types/character';
+import React, { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { GameState, Character } from '../types/character';
 import CharacterAvatar from './CharacterAvatar';
+import {
+  characterCatalog,
+  CharacterTemplate,
+  createCharacterFromTemplate,
+} from '../data/characterCatalog';
+import { spendMoney } from '../utils/gameLogic';
 
 interface FormationScreenProps {
   gameState: GameState;
   onGameStateUpdate: (newGameState: GameState) => void;
 }
 
+const MAX_FORMATION_SIZE = 4;
+
+const formatType = (type: string): string => {
+  return type === '診断結果' ? '' : type;
+};
+
 const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStateUpdate }) => {
-  const [selectedFormation, setSelectedFormation] = useState<string>('balanced');
-
-  const formations = [
-    {
-      id: 'balanced',
-      name: 'バランス型',
-      description: '全能力をバランスよく配置',
-      icon: '⚖️',
-      stats: { stress: 0, communication: 0, endurance: 0, luck: 0 }
-    },
-    {
-      id: 'stress_focus',
-      name: 'ストレス耐性重視',
-      description: 'ストレス耐性を最大限に高める',
-      icon: '😤',
-      stats: { stress: 10, communication: -2, endurance: 5, luck: -3 }
-    },
-    {
-      id: 'communication_focus',
-      name: 'コミュニケーション重視',
-      description: 'コミュニケーション能力を強化',
-      icon: '💬',
-      stats: { stress: -3, communication: 10, endurance: 2, luck: 1 }
-    },
-    {
-      id: 'endurance_focus',
-      name: '持久力重視',
-      description: '長時間の作業に特化',
-      icon: '💪',
-      stats: { stress: 5, communication: -1, endurance: 10, luck: -4 }
-    },
-    {
-      id: 'luck_focus',
-      name: '運重視',
-      description: '運の良さを最大限に活用',
-      icon: '🍀',
-      stats: { stress: -5, communication: 3, endurance: -2, luck: 10 }
-    }
-  ];
-
-  const handleFormationChange = (formationId: string) => {
-    setSelectedFormation(formationId);
+  const getInitialSlots = () => {
+    const base = Array.from({ length: MAX_FORMATION_SIZE }, (_, index) => gameState.formation?.[index] ?? null);
+    return base as (string | null)[];
   };
 
-  const applyFormation = () => {
-    const formation = formations.find(f => f.id === selectedFormation);
-    if (!formation) return;
+  const [formationSlots, setFormationSlots] = useState<(string | null)[]>(getInitialSlots);
+  const [activeSlot, setActiveSlot] = useState<number | null>(() => {
+    const slots = getInitialSlots();
+    const firstEmpty = slots.findIndex((slot) => slot === null);
+    return firstEmpty >= 0 ? firstEmpty : 0;
+  });
+  const [message, setMessage] = useState<string>('');
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const newGameState = { ...gameState };
-    
-    // フォーメーション効果を適用
-    Object.entries(formation.stats).forEach(([stat, value]) => {
-      if (value !== 0) {
-        newGameState.character = {
-          ...newGameState.character,
-          stats: {
-            ...newGameState.character.stats,
-            [stat]: Math.max(0, Math.min(100, newGameState.character.stats[stat as keyof typeof newGameState.character.stats] + value))
-          }
-        };
+  useEffect(() => {
+    const slots = getInitialSlots();
+    setFormationSlots(slots);
+    const firstEmpty = slots.findIndex((slot) => slot === null);
+    setActiveSlot(firstEmpty >= 0 ? firstEmpty : 0);
+  }, [gameState.formation]);
+
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
       }
+    };
+  }, []);
+
+  const showMessage = (text: string) => {
+    setMessage(text);
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+    messageTimeoutRef.current = setTimeout(() => setMessage(''), 3000);
+  };
+
+  const ownedCharacters = useMemo(() => {
+    const owned = Array.isArray(gameState.ownedCharacters) && gameState.ownedCharacters.length > 0
+      ? gameState.ownedCharacters
+      : [gameState.character];
+    const seen = new Set<string>();
+    return owned.filter((character) => {
+      if (seen.has(character.id)) {
+        return false;
+      }
+      seen.add(character.id);
+      return true;
+    });
+  }, [gameState.character, gameState.ownedCharacters]);
+
+  const ownedCharacterMap = useMemo(() => {
+    const map = new Map<string, Character>();
+    ownedCharacters.forEach((character) => {
+      map.set(character.id, character);
+    });
+    return map;
+  }, [ownedCharacters]);
+
+  const purchasableTemplates = useMemo(
+    () => characterCatalog.filter((template) => !ownedCharacterMap.has(template.id)),
+    [ownedCharacterMap]
+  );
+
+  const selectSlot = (index: number) => {
+    setActiveSlot(index);
+  };
+
+  const handleSlotKeyDown = (event: KeyboardEvent<HTMLDivElement>, index: number) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectSlot(index);
+    }
+  };
+
+  const assignCharacterToSlot = (characterId: string) => {
+    if (activeSlot === null) {
+      showMessage('編成する枠を先に選択してください。');
+      return;
+    }
+
+    const character = ownedCharacterMap.get(characterId);
+    if (!character) {
+      showMessage('編成できるキャラクターが見つかりませんでした。');
+      return;
+    }
+
+    setFormationSlots((prev) => {
+      const updated = [...prev];
+      const existingIndex = updated.findIndex((id) => id === characterId);
+      if (existingIndex !== -1) {
+        updated[existingIndex] = null;
+      }
+      updated[activeSlot] = characterId;
+      return updated;
     });
 
-    onGameStateUpdate(newGameState);
+    showMessage(`${character.name}を連隊に配置しました。`);
   };
 
+  const removeSlot = (index: number) => {
+    setFormationSlots((prev) => {
+      const updated = [...prev];
+      updated[index] = null;
+      return updated;
+    });
+    showMessage(`連隊${index + 1}の枠を空にしました。`);
+  };
+
+  const handlePurchase = (template: CharacterTemplate) => {
+    if (gameState.money < template.price) {
+      showMessage('お金が足りません！');
+      return;
+    }
+
+    const spentState = spendMoney(gameState, template.price);
+    if (!spentState) {
+      showMessage('お金が足りません！');
+      return;
+    }
+
+    const newCharacter = createCharacterFromTemplate(template);
+    const updatedOwned = [...ownedCharacters, newCharacter];
+
+    onGameStateUpdate({
+      ...spentState,
+      ownedCharacters: updatedOwned,
+    });
+
+    setFormationSlots((prev) => {
+      if (activeSlot !== null && !prev[activeSlot]) {
+        const next = [...prev];
+        next[activeSlot] = newCharacter.id;
+        return next;
+      }
+      return prev;
+    });
+
+    showMessage(`${template.name}を購入しました！`);
+  };
+
+  const handleSaveFormation = () => {
+    const selectedIds = formationSlots.filter((slot): slot is string => Boolean(slot));
+
+    if (selectedIds.length === 0) {
+      showMessage('少なくとも1人は編成してください。');
+      return;
+    }
+
+    const leader = ownedCharacterMap.get(selectedIds[0]) ?? gameState.character;
+
+    const updatedGameState: GameState = {
+      ...gameState,
+      ownedCharacters,
+      formation: selectedIds,
+      character: leader,
+    };
+
+    onGameStateUpdate(updatedGameState);
+    showMessage('編成を保存しました！');
+  };
+
+  const getCharacterInSlot = (slot: string | null) => {
+    if (!slot) {
+      return undefined;
+    }
+    return ownedCharacterMap.get(slot);
+  };
+
+  const renderStatBadge = (label: string, value: number) => (
+    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+      <span className="font-semibold text-gray-700">{value}</span>
+      <span>{label}</span>
+    </span>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">編成</h1>
-        
-        {/* 現在のキャラクター */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">現在のキャラクター</h2>
-          <div className="flex justify-center mb-4">
-            <CharacterAvatar character={gameState.character} size="large" />
-          </div>
-          <div className="text-center">
-            <h3 className="font-bold text-gray-800">{gameState.character.name}</h3>
-            <p className="text-sm text-gray-600">レベル {gameState.character.level}</p>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-32">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <h1 className="text-2xl font-bold text-gray-800">編成</h1>
+          <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-gray-700 shadow">
+            <span>💰</span>
+            <span>{gameState.money}</span>
           </div>
         </div>
 
-        {/* フォーメーション選択 */}
-        <div className="space-y-3 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">フォーメーション選択</h2>
-          {formations.map((formation) => (
-            <div
-              key={formation.id}
-              onClick={() => handleFormationChange(formation.id)}
-              className={`p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                selectedFormation === formation.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{formation.icon}</span>
-                <div className="flex-1">
-                  <h3 className="font-bold text-gray-800">{formation.name}</h3>
-                  <p className="text-sm text-gray-600">{formation.description}</p>
-                </div>
-                <div className="text-right">
-                  {selectedFormation === formation.id && (
-                    <span className="text-blue-500 text-lg">✓</span>
+        {message && (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 shadow-sm">
+            {message}
+          </div>
+        )}
+
+        <section className="rounded-3xl border border-blue-100 bg-white/80 p-6 shadow">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-gray-800">連隊編成</h2>
+            <p className="text-sm text-gray-500">最大4人まで配置できます。枠を選んでからメンバーを選択してください。</p>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {formationSlots.map((slot, index) => {
+              const character = getCharacterInSlot(slot);
+              const isActive = activeSlot === index;
+              const isEmpty = !character;
+
+              return (
+                <div
+                  key={index}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => selectSlot(index)}
+                  onKeyDown={(event) => handleSlotKeyDown(event, index)}
+                  className={`group flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                    isActive
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow'
+                  }`}
+                >
+                  <div className="text-xs font-semibold uppercase tracking-widest text-gray-500">連隊{index + 1}</div>
+                  <div className="flex h-36 w-full items-center justify-center">
+                    {character ? (
+                      <CharacterAvatar character={character} size="medium" />
+                    ) : (
+                      <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-3xl text-gray-300">
+                        +
+                      </div>
+                    )}
+                  </div>
+                  {character ? (
+                    <>
+                      <div>
+                        <div className="text-base font-bold text-gray-800">{character.name}</div>
+                        <div className="text-xs text-gray-500">Lv.{character.level}</div>
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2 text-[11px] text-gray-500">
+                        {renderStatBadge('ストレス', character.stats.stress)}
+                        {renderStatBadge('コミュ力', character.stats.communication)}
+                        {renderStatBadge('持久力', character.stats.endurance)}
+                        {renderStatBadge('運', character.stats.luck)}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          removeSlot(index);
+                        }}
+                        className="text-xs font-semibold text-blue-600 underline-offset-2 transition hover:underline"
+                      >
+                        枠を空にする
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-500">メンバー未設定</p>
                   )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* 現在の統計値 */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
-          <h3 className="font-bold text-gray-800 mb-3">現在の統計値</h3>
-          <div className="space-y-2">
-            {Object.entries(gameState.character.stats).map(([stat, value]) => (
-              <div key={stat} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  {stat === 'stress' ? 'ストレス耐性' :
-                   stat === 'communication' ? 'コミュニケーション' :
-                   stat === 'endurance' ? '持久力' : '運'}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${value}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium w-8">{value}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </div>
+        </section>
 
-        {/* 適用ボタン */}
-        <div className="text-center">
+        <section className="rounded-3xl border border-purple-100 bg-white/80 p-6 shadow">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-gray-800">保有キャラクター</h2>
+            <p className="text-xs text-gray-500">編成したい枠を選んでからメンバーを追加しましょう。</p>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {ownedCharacters.map((character) => {
+              const inFormation = formationSlots.includes(character.id);
+              return (
+                <div key={character.id} className={`flex flex-col gap-3 rounded-2xl border p-4 transition ${inFormation ? 'border-purple-400 bg-purple-50' : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow'}`}>
+                  <div className="flex items-center gap-3">
+                    <CharacterAvatar character={character} size="small" />
+                    <div>
+                      <div className="text-sm font-bold text-gray-800">{character.name}</div>
+                      {formatType(character.type) && (
+                        <div className="text-xs text-gray-500">{formatType(character.type)}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-[11px] text-gray-500">
+                    {renderStatBadge('ストレス', character.stats.stress)}
+                    {renderStatBadge('コミュ力', character.stats.communication)}
+                    {renderStatBadge('持久力', character.stats.endurance)}
+                    {renderStatBadge('運', character.stats.luck)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => assignCharacterToSlot(character.id)}
+                    disabled={activeSlot === null}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeSlot === null
+                        ? 'bg-gray-200 text-gray-400'
+                        : 'bg-purple-500 text-white hover:bg-purple-600'
+                    }`}
+                  >
+                    {inFormation ? '配置し直す' : '連隊に編成'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-emerald-100 bg-white/80 p-6 shadow">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-gray-800">キャラクター購入</h2>
+            <p className="text-xs text-gray-500">全16体の仲間から気になるキャラクターを迎え入れましょう。</p>
+          </div>
+          {purchasableTemplates.length === 0 ? (
+            <p className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              すべてのキャラクターを仲間にしました！
+            </p>
+          ) : (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {purchasableTemplates.map((template) => {
+                const previewCharacter: Character = {
+                  id: template.id,
+                  name: template.name,
+                  type: template.type,
+                  level: 1,
+                  exp: 0,
+                  expToNextLevel: 100,
+                  stats: template.stats,
+                  appearance: template.appearance,
+                  createdAt: template.id,
+                };
+
+                return (
+                  <div key={template.id} className="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <CharacterAvatar character={previewCharacter} size="small" />
+                      <div>
+                        <div className="text-sm font-bold text-gray-800">{template.name}</div>
+                        {formatType(template.type) && (
+                          <div className="text-xs text-gray-500">{formatType(template.type)}</div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">{template.description}</p>
+                    <div className="flex flex-wrap gap-2 text-[11px] text-gray-500">
+                      {renderStatBadge('ストレス', template.stats.stress)}
+                      {renderStatBadge('コミュ力', template.stats.communication)}
+                      {renderStatBadge('持久力', template.stats.endurance)}
+                      {renderStatBadge('運', template.stats.luck)}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-semibold text-emerald-600">💰 {template.price}</div>
+                      <button
+                        type="button"
+                        onClick={() => handlePurchase(template)}
+                        disabled={gameState.money < template.price}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                          gameState.money >= template.price
+                            ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                            : 'bg-gray-200 text-gray-400'
+                        }`}
+                      >
+                        購入
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <div className="flex justify-end">
           <button
-            onClick={applyFormation}
-            className="bg-blue-500 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-600 transition-colors"
+            type="button"
+            onClick={handleSaveFormation}
+            className="rounded-full bg-blue-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-600"
           >
-            フォーメーションを適用
+            編成を保存
           </button>
         </div>
       </div>

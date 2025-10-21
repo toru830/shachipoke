@@ -101,6 +101,77 @@ export const shopItems: ShopItem[] = [
     icon: '⚽',
   },
   {
+    id: 'sleeping_bag',
+    name: '寝袋',
+    description: 'デスクの下でも快眠できる寝袋',
+    price: 45,
+    category: 'equipment',
+    effects: {
+      stats: {
+        stress: -12,
+        endurance: 6,
+      },
+    },
+    icon: '🛌',
+  },
+  {
+    id: 'sub_display',
+    name: 'サブディスプレイ',
+    description: '作業効率が上がる追加モニター',
+    price: 120,
+    category: 'equipment',
+    effects: {
+      stats: {
+        communication: 4,
+        stress: -5,
+        luck: 2,
+      },
+    },
+    icon: '🖥️',
+  },
+  {
+    id: 'trackball_mouse',
+    name: 'トラックボールマウス',
+    description: '長時間の作業でも疲れにくいマウス',
+    price: 70,
+    category: 'equipment',
+    effects: {
+      stats: {
+        endurance: 4,
+        communication: 2,
+      },
+    },
+    icon: '🖱️',
+  },
+  {
+    id: 'stomach_medicine',
+    name: '胃薬',
+    description: '胃の不調を和らげてストレス軽減',
+    price: 25,
+    category: 'drink',
+    effects: {
+      stats: {
+        stress: -10,
+        endurance: 1,
+      },
+    },
+    icon: '🧴',
+  },
+  {
+    id: 'razor',
+    name: 'ひげ剃り',
+    description: '身だしなみを整えて信頼度アップ',
+    price: 35,
+    category: 'equipment',
+    effects: {
+      stats: {
+        communication: 2,
+        luck: 3,
+      },
+    },
+    icon: '🪒',
+  },
+  {
     id: 'vitamin',
     name: 'ビタミン剤',
     description: '体調管理に役立つビタミン剤',
