@@ -80,6 +80,21 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
           return '😵'; // 燃え尽き
         case 'SLAVE':
           return '⛓️'; // 社畜
+        case 'KIND':
+        case 'KIND_HEARTED':
+          return '😇'; // 心優しき社畜
+        case 'PERFECT':
+        case 'PERFECTIONIST':
+          return '✨'; // 完璧主義者
+        case 'LAZY':
+        case 'LAZY_PERSON':
+          return '😴'; // 怠け者
+        case 'STRESSED':
+        case 'STRESSED_OUT':
+          return '😰'; // ストレス社畜
+        case 'HAPPY':
+        case 'HAPPY_WORKER':
+          return '😊'; // ハッピーワーカー
         default:
           return '🧑‍💼'; // デフォルト
       }
