@@ -23,7 +23,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
   
   if (character.appearance.characterId && typeof character.appearance.characterId === 'number' && character.appearance.characterId >= 1 && character.appearance.characterId <= 16) {
     const characterId = character.appearance.characterId.toString().padStart(3, '0');
-    const imagePath = `./characters/${characterId}.png`;
+    const imagePath = `https://shachipoke.syachiku-life.com/characters/${characterId}.png`;
     console.log('Loading character image:', {
       characterId: character.appearance.characterId,
       paddedId: characterId,
