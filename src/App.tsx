@@ -3,13 +3,11 @@ import { GameState } from './types/character';
 import { 
   loadGameState, 
   saveGameState, 
-  getCharacterFromURL,
   createDefaultCharacter,
   createDefaultGameState,
   resetDailyEvents
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
-import { getDiagnosisFromURL, convertDiagnosisToCharacter } from './utils/diagnosisConverter';
 import IntroVideo from './components/IntroVideo';
 import Home from './components/Home';
 import EventScreen from './components/EventScreen';
@@ -32,9 +30,11 @@ function App() {
       
       // まずURLパラメータから社畜診断のキャラクター情報を取得試行
       const diagnosisChar = getCharacterFromUrl();
+      console.log('App.tsx - diagnosisChar:', diagnosisChar);
       
-      if (diagnosisChar.fromShindan && diagnosisChar.characterId && diagnosisChar.characterName) {
+      if (diagnosisChar.characterId && diagnosisChar.characterName) {
         const character = convertDiagnosisCharacterToCharacter(diagnosisChar);
+        console.log('App.tsx - converted character:', character);
         if (character) {
           const newGameState: GameState = {
             character: character,
@@ -61,26 +61,6 @@ function App() {
         }
       }
 
-      // 次に従来の診断サイトからのデータを取得試行
-      const diagnosisResult = getDiagnosisFromURL();
-      if (diagnosisResult) {
-        const character = convertDiagnosisToCharacter(diagnosisResult);
-        const newGameState = createDefaultGameState(character);
-        setGameState(newGameState);
-        saveGameState(newGameState);
-        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
-        return;
-      }
-
-      // 次に従来のURLパラメータからキャラクターデータを取得試行
-      const urlCharacter = getCharacterFromURL();
-      if (urlCharacter) {
-        const newGameState = createDefaultGameState(urlCharacter);
-        setGameState(newGameState);
-        saveGameState(newGameState);
-        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
-        return;
-      }
 
       // URLにデータがない場合、既存のセーブデータを確認
       const savedState = loadGameState();
