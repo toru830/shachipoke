@@ -17,7 +17,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
   const baseClasses = `flex items-center justify-center flex-shrink-0 ${sizeClasses[size]} ${className}`;
 
   // 社畜診断のキャラクターアイコンを使用する場合（数値IDのみ）
-  if (character.appearance.characterId && typeof character.appearance.characterId === 'number') {
+  if (character.appearance.characterId && typeof character.appearance.characterId === 'number' && character.appearance.characterId >= 1 && character.appearance.characterId <= 16) {
     const characterId = character.appearance.characterId.toString().padStart(3, '0');
     console.log('Loading character image:', {
       characterId: character.appearance.characterId,

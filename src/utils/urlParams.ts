@@ -40,22 +40,53 @@ export function getCharacterFromUrl(): DiagnosisCharacter {
   return result;
 }
 
+// 文字列キャラクターIDを数値ID（1-16）にマッピング
+function getCharacterIdFromString(characterId: string): number | undefined {
+  const idMap: { [key: string]: number } = {
+    'PACE': 1,
+    'MY_PACE': 1,
+    'FREE': 2,
+    'FREE_PERSON': 2,
+    'WORKAHOLIC': 3,
+    'BURNOUT': 4,
+    'SLAVE': 5,
+    'KIND': 6,
+    'KIND_HEARTED': 6,
+    'PERFECT': 7,
+    'PERFECTIONIST': 7,
+    'LAZY': 8,
+    'LAZY_PERSON': 8,
+    'STRESSED': 9,
+    'STRESSED_OUT': 9,
+    'HAPPY': 10,
+    'HAPPY_WORKER': 10,
+    'BOSS': 11,
+    'MANAGER': 12,
+    'SENIOR': 13,
+    'JUNIOR': 14,
+    'INTERN': 15,
+    'FREELANCER': 16,
+  };
+  
+  return idMap[characterId.toUpperCase()];
+}
+
 // 診断から来たキャラクター情報をCharacter型に変換
 export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCharacter): Character | null {
   if (!diagnosisChar.characterId || !diagnosisChar.characterName) {
     return null;
   }
 
-  // キャラクターIDを処理（数値の場合は数値に、文字列の場合はそのまま）
-  let validCharacterId: number | string | undefined;
+  // キャラクターIDを処理（文字列IDを数値IDにマッピング）
+  let validCharacterId: number | undefined;
   const characterIdNum = parseInt(diagnosisChar.characterId, 10);
   
   if (!isNaN(characterIdNum)) {
     // 数値の場合（001 -> 1）
     validCharacterId = characterIdNum;
   } else {
-    // 文字列の場合（PACE, FREE等）
-    validCharacterId = diagnosisChar.characterId;
+    // 文字列の場合（PACE, KIND等）を数値IDにマッピング
+    validCharacterId = getCharacterIdFromString(diagnosisChar.characterId);
   }
   
   console.log('Character ID conversion:', {
@@ -63,44 +94,6 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
     parsed: characterIdNum,
     valid: validCharacterId
   });
-  
-  // 文字列キャラクターIDに応じた絵文字を設定
-  const getEmojiForCharacterId = (id: string | number | undefined): string => {
-    if (typeof id === 'string') {
-      switch (id.toUpperCase()) {
-        case 'PACE':
-        case 'MY_PACE':
-          return '🐌'; // マイペース
-        case 'FREE':
-        case 'FREE_PERSON':
-          return '🕊️'; // 自由人
-        case 'WORKAHOLIC':
-          return '💼'; // ワーカホリック
-        case 'BURNOUT':
-          return '😵'; // 燃え尽き
-        case 'SLAVE':
-          return '⛓️'; // 社畜
-        case 'KIND':
-        case 'KIND_HEARTED':
-          return '😇'; // 心優しき社畜
-        case 'PERFECT':
-        case 'PERFECTIONIST':
-          return '✨'; // 完璧主義者
-        case 'LAZY':
-        case 'LAZY_PERSON':
-          return '😴'; // 怠け者
-        case 'STRESSED':
-        case 'STRESSED_OUT':
-          return '😰'; // ストレス社畜
-        case 'HAPPY':
-        case 'HAPPY_WORKER':
-          return '😊'; // ハッピーワーカー
-        default:
-          return '🧑‍💼'; // デフォルト
-      }
-    }
-    return '🧑‍💼'; // デフォルト
-  };
 
   return {
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
@@ -118,7 +111,7 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
     appearance: {
       color: '#4F46E5',
       style: 'default',
-      emoji: getEmojiForCharacterId(validCharacterId),
+      emoji: '🧑‍💼', // デフォルト絵文字（画像が読み込めない場合のフォールバック）
       characterId: validCharacterId,
     },
     createdAt: new Date().toISOString(),
