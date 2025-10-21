@@ -25,17 +25,21 @@ function App() {
 
   useEffect(() => {
     const initGame = () => {
+      console.log('App.tsx - initGame started');
       // イントロ動画を見たかどうかを確認
       const hasSeenIntro = localStorage.getItem('shachipoke_intro_seen') === 'true';
+      console.log('App.tsx - hasSeenIntro:', hasSeenIntro);
       
       // まずURLパラメータから社畜診断のキャラクター情報を取得試行
       const diagnosisChar = getCharacterFromUrl();
       console.log('App.tsx - diagnosisChar:', diagnosisChar);
       
       if (diagnosisChar.characterId && diagnosisChar.characterName) {
+        console.log('App.tsx - processing diagnosis character');
         const character = convertDiagnosisCharacterToCharacter(diagnosisChar);
         console.log('App.tsx - converted character:', character);
         if (character) {
+          console.log('App.tsx - character created successfully, setting game state');
           const newGameState: GameState = {
             character: character,
             money: 50,
