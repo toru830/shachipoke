@@ -92,7 +92,10 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
   console.log('Character ID conversion:', {
     original: diagnosisChar.characterId,
     parsed: characterIdNum,
-    valid: validCharacterId
+    valid: validCharacterId,
+    isString: typeof diagnosisChar.characterId === 'string',
+    isNumber: typeof validCharacterId === 'number',
+    inRange: validCharacterId && validCharacterId >= 1 && validCharacterId <= 16
   });
 
   return {
