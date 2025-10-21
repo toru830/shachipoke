@@ -16,7 +16,7 @@ export interface Character {
     style: string;
     emoji?: string;
     avatar?: string;
-    characterId?: number;
+    characterId?: number | string;
   };
   createdAt: string;
 }

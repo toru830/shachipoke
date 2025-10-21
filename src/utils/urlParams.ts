@@ -46,9 +46,17 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
     return null;
   }
 
-  // キャラクターIDを数値に変換（001 -> 1）。数値でない場合は未設定にして誤表示を防止
+  // キャラクターIDを処理（数値の場合は数値に、文字列の場合はそのまま）
+  let validCharacterId: number | string | undefined;
   const characterIdNum = parseInt(diagnosisChar.characterId, 10);
-  const validCharacterId = isNaN(characterIdNum) ? undefined : characterIdNum;
+  
+  if (!isNaN(characterIdNum)) {
+    // 数値の場合（001 -> 1）
+    validCharacterId = characterIdNum;
+  } else {
+    // 文字列の場合（PACE, FREE等）
+    validCharacterId = diagnosisChar.characterId;
+  }
   
   console.log('Character ID conversion:', {
     original: diagnosisChar.characterId,
@@ -56,6 +64,29 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
     valid: validCharacterId
   });
   
+  // 文字列キャラクターIDに応じた絵文字を設定
+  const getEmojiForCharacterId = (id: string | number | undefined): string => {
+    if (typeof id === 'string') {
+      switch (id.toUpperCase()) {
+        case 'PACE':
+        case 'MY_PACE':
+          return '🐌'; // マイペース
+        case 'FREE':
+        case 'FREE_PERSON':
+          return '🕊️'; // 自由人
+        case 'WORKAHOLIC':
+          return '💼'; // ワーカホリック
+        case 'BURNOUT':
+          return '😵'; // 燃え尽き
+        case 'SLAVE':
+          return '⛓️'; // 社畜
+        default:
+          return '🧑‍💼'; // デフォルト
+      }
+    }
+    return '🧑‍💼'; // デフォルト
+  };
+
   return {
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: diagnosisChar.characterName,
@@ -72,7 +103,7 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
     appearance: {
       color: '#4F46E5',
       style: 'default',
-      emoji: '🧑‍💼',
+      emoji: getEmojiForCharacterId(validCharacterId),
       characterId: validCharacterId,
     },
     createdAt: new Date().toISOString(),
