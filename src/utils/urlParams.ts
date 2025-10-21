@@ -44,32 +44,30 @@ export function getCharacterFromUrl(): DiagnosisCharacter {
 function getCharacterIdFromString(characterId: string): number | undefined {
   console.log('getCharacterIdFromString called with:', characterId);
   const idMap: { [key: string]: number } = {
-    'PACE': 1,
-    'MY_PACE': 1,
-    'FREE': 2,
-    'FREE_PERSON': 2,
-    'WORKAHOLIC': 3,
-    'BURNOUT': 4,
-    'SLAVE': 5,
-    'KIND': 1,
-    'KIND_HEARTED': 1,
-    'PERFECT': 7,
-    'PERFECTIONIST': 7,
-    'LAZY': 8,
-    'LAZY_PERSON': 8,
-    'STRESSED': 9,
-    'STRESSED_OUT': 9,
-    'HAPPY': 10,
-    'HAPPY_WORKER': 10,
-    'NICE': 2,
-    'NICE_PERSON': 2,
-    'GOOD_NATURED': 2,
-    'BOSS': 11,
-    'MANAGER': 12,
-    'SENIOR': 13,
-    'JUNIOR': 14,
-    'INTERN': 15,
-    'FREELANCER': 16,
+    // 正しい社畜診断の16種類のキャラクター
+    'ELITE': 1,           // 生粋の社畜
+    'BURNOUT': 2,         // 限界突破社畜
+    'STOIC': 3,           // 無敗の職人社畜
+    'LONE': 4,            // 孤高の成果主義社畜
+    'KIND': 5,            // 心優しき社畜
+    'SENSITIVE': 6,       // 誠実な観察社員
+    'TEAM': 7,            // 共創リーダー社員
+    'PACE': 8,            // マイペース社員
+    'YURUFUWA': 9,        // ゆるふわ社畜
+    'HIDDEN': 10,         // 隠れ疲労社畜
+    'NICE': 11,           // お人好し社員
+    'REAL': 12,           // 現実派社員
+    'FAMILY': 13,         // 家庭が大事社員
+    'LWB': 14,            // バランサー社員
+    'ABLE': 15,           // 成果最適化社畜
+    'FREE': 16,           // 自由人
+    
+    // 互換性のためのエイリアス
+    'MY_PACE': 8,
+    'FREE_PERSON': 16,
+    'KIND_HEARTED': 5,
+    'NICE_PERSON': 11,
+    'GOOD_NATURED': 11,
   };
   
   const result = idMap[characterId.toUpperCase()];
