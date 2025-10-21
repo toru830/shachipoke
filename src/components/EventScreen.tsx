@@ -10,19 +10,30 @@ interface EventScreenProps {
 
 const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate }) => {
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
   const [eventHistory, setEventHistory] = useState<string[]>([]);
 
   useEffect(() => {
     if (!currentEvent) {
       const newEvent = getRandomEvent();
       setCurrentEvent(newEvent);
+      setSelectedChoice(null);
+      setShowResult(false);
     }
   }, [currentEvent]);
 
   const handleChoice = (choiceIndex: number) => {
     if (!currentEvent) return;
 
-    const choice = currentEvent.choices[choiceIndex];
+    setSelectedChoice(choiceIndex);
+    setShowResult(true);
+  };
+
+  const confirmChoice = () => {
+    if (!currentEvent || selectedChoice === null) return;
+
+    const choice = currentEvent.choices[selectedChoice];
     if (!choice) return;
 
     let newGameState = { ...gameState };
@@ -84,35 +95,71 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-20">
       <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">イベント</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-6 text-center">イベント</h1>
         
         {/* 現在のイベント */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-2">{currentEvent.title}</h2>
-          <p className="text-gray-600 mb-4">{currentEvent.description}</p>
+        <div className="bg-gradient-to-br from-white to-pink-50 rounded-2xl p-6 border-2 border-pink-200 shadow-lg mb-4">
+          <h2 className="text-xl font-bold text-gray-800 mb-3">{currentEvent.title}</h2>
+          <p className="text-gray-600 mb-6 text-lg">{currentEvent.description}</p>
           
-          <div className="space-y-2">
-            {currentEvent.choices.map((choice, index) => (
+          {!showResult ? (
+            <div className="space-y-3">
+              <h3 className="text-lg font-bold text-gray-700 mb-3">どうしますか？</h3>
+              {currentEvent.choices.map((choice, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleChoice(index)}
+                  className="w-full p-4 text-left bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 rounded-xl border-2 border-blue-200 hover:border-purple-300 transition-all transform hover:scale-105"
+                >
+                  <span className="text-lg font-medium">{choice.text}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-700 mb-3">選択した回答</h3>
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-200">
+                  <p className="text-lg font-medium text-green-800">
+                    {currentEvent.choices[selectedChoice!].text}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-700 mb-3">獲得したシャチ</h3>
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border-2 border-yellow-200">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-3xl">💰</span>
+                    <span className="text-2xl font-bold text-yellow-800">
+                      +{currentEvent.choices[selectedChoice!].effects.money || 0} シャチ
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <button
-                key={index}
-                onClick={() => handleChoice(index)}
-                className="w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
+                onClick={confirmChoice}
+                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-lg"
               >
-                {choice.text}
+                シャチをゲット！
               </button>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* イベント履歴 */}
         {eventHistory.length > 0 && (
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">イベント履歴</h3>
+          <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <span>📝</span>
+              イベント履歴
+            </h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {eventHistory.slice(-5).map((event, index) => (
-                <div key={index} className="text-sm text-gray-600 p-2 bg-gray-50 rounded">
+                <div key={index} className="text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
                   {event}
                 </div>
               ))}
@@ -124,7 +171,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
         <div className="mt-4 text-center">
           <button
             onClick={triggerNewEvent}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg"
           >
             新しいイベント
           </button>

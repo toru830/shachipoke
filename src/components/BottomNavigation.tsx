@@ -1,6 +1,6 @@
 import React from 'react';
 
-type Screen = 'home' | 'event' | 'upgrade' | 'shop' | 'training' | 'formation' | 'achievement' | 'settings';
+type Screen = 'home' | 'event' | 'shop' | 'formation' | 'settings';
 
 interface BottomNavigationProps {
   currentScreen: Screen;
@@ -11,11 +11,8 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentScreen, onNa
   const navItems = [
     { id: 'home' as Screen, label: 'ホーム', icon: '🏠' },
     { id: 'event' as Screen, label: 'イベント', icon: '📅' },
-    { id: 'upgrade' as Screen, label: 'アップグレード', icon: '⬆️' },
     { id: 'shop' as Screen, label: 'ショップ', icon: '🛒' },
-    { id: 'training' as Screen, label: 'トレーニング', icon: '💪' },
     { id: 'formation' as Screen, label: '編成', icon: '👥' },
-    { id: 'achievement' as Screen, label: '実績', icon: '🏆' },
     { id: 'settings' as Screen, label: '設定', icon: '⚙️' },
   ];
 

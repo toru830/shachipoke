@@ -89,6 +89,18 @@ const Home = ({ character, money }: HomeProps) => {
             </div>
           </div>
         </div>
+
+        {/* 実績セクション */}
+        <div className="mt-6 bg-gradient-to-br from-white to-yellow-50 rounded-2xl p-6 border-2 border-yellow-200 shadow-lg">
+          <h3 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-4 flex items-center gap-2 justify-center">
+            <span className="text-2xl">🏆</span>
+            実績
+          </h3>
+          <div className="text-center text-gray-600">
+            <p className="text-lg mb-2">まだ実績はありません</p>
+            <p className="text-sm">イベントをクリアして実績を獲得しましょう！</p>
+          </div>
+        </div>
       </div>
     </div>
   );

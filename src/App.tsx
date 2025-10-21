@@ -12,16 +12,13 @@ import { getDiagnosisFromURL, convertDiagnosisToCharacter } from './utils/diagno
 import IntroVideo from './components/IntroVideo';
 import Home from './components/Home';
 import EventScreen from './components/EventScreen';
-import UpgradeScreen from './components/UpgradeScreen';
 import ShopScreen from './components/ShopScreen';
-import TrainingScreen from './components/TrainingScreen';
 import FormationScreen from './components/FormationScreen';
-import AchievementScreen from './components/AchievementScreen';
 import SettingsScreen from './components/SettingsScreen';
 import Welcome from './components/Welcome';
 import BottomNavigation from './components/BottomNavigation';
 
-type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'upgrade' | 'shop' | 'training' | 'formation' | 'achievement' | 'settings';
+type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'shop' | 'formation' | 'settings';
 
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -29,6 +26,9 @@ function App() {
 
   useEffect(() => {
     const initGame = () => {
+      // イントロ動画を見たかどうかを確認
+      const hasSeenIntro = localStorage.getItem('shachipoke_intro_seen') === 'true';
+      
       // まずURLパラメータから社畜診断のキャラクター情報を取得試行
       const diagnosisChar = getCharacterFromUrl();
       
@@ -50,7 +50,7 @@ function App() {
           };
           setGameState(newGameState);
           saveGameState(newGameState);
-          setCurrentScreen('intro'); // イントロ動画から開始
+          setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
           return;
         }
       }
@@ -62,7 +62,7 @@ function App() {
         const newGameState = createDefaultGameState(character);
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('intro');
+        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
         return;
       }
 
@@ -72,7 +72,7 @@ function App() {
         const newGameState = createDefaultGameState(urlCharacter);
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('intro');
+        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
         return;
       }
 
@@ -87,7 +87,7 @@ function App() {
         const newGameState = createDefaultGameState(defaultCharacter);
         setGameState(newGameState);
         saveGameState(newGameState);
-        setCurrentScreen('intro');
+        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
       }
     };
     
@@ -99,6 +99,7 @@ function App() {
   };
 
   const completeIntro = () => {
+    localStorage.setItem('shachipoke_intro_seen', 'true');
     setCurrentScreen('welcome');
   };
 
@@ -143,26 +144,8 @@ function App() {
           }} 
         />
       )}
-      {currentScreen === 'upgrade' && (
-        <UpgradeScreen 
-          gameState={gameState} 
-          onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
-        />
-      )}
       {currentScreen === 'shop' && (
         <ShopScreen 
-          gameState={gameState} 
-          onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
-        />
-      )}
-      {currentScreen === 'training' && (
-        <TrainingScreen 
           gameState={gameState} 
           onGameStateUpdate={(newGameState) => {
             setGameState(newGameState);
@@ -178,9 +161,6 @@ function App() {
             saveGameState(newGameState);
           }} 
         />
-      )}
-      {currentScreen === 'achievement' && (
-        <AchievementScreen achievements={gameState.achievements} />
       )}
       {currentScreen === 'settings' && (
         <SettingsScreen 
