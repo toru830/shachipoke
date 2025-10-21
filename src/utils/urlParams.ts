@@ -42,6 +42,7 @@ export function getCharacterFromUrl(): DiagnosisCharacter {
 
 // 文字列キャラクターIDを数値ID（1-16）にマッピング
 function getCharacterIdFromString(characterId: string): number | undefined {
+  console.log('getCharacterIdFromString called with:', characterId);
   const idMap: { [key: string]: number } = {
     'PACE': 1,
     'MY_PACE': 1,
@@ -71,7 +72,9 @@ function getCharacterIdFromString(characterId: string): number | undefined {
     'FREELANCER': 16,
   };
   
-  return idMap[characterId.toUpperCase()];
+  const result = idMap[characterId.toUpperCase()];
+  console.log('getCharacterIdFromString result:', result);
+  return result;
 }
 
 // 診断から来たキャラクター情報をCharacter型に変換
