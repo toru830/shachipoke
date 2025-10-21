@@ -219,17 +219,15 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
             <p className="text-sm text-gray-500">最大4人まで配置できます。枠を選んでからメンバーを選択してください。</p>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {formationSlots.map((slot, index) => {
-              const character = getCharacterInSlot(slot);
-              const isActive = activeSlot === index;
-              const isEmpty = !character;
-
-              return (
-                <div
-                  key={index}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => selectSlot(index)}
+{formationSlots.map((slot, index) => {
+  const character = getCharacterInSlot(slot);
+  const isActive = activeSlot === index;
+  return (
+    <div
+      key={index}
+      role="button"
+      tabIndex={0}
+      onClick={() => selectSlot(index)}
                   onKeyDown={(event) => handleSlotKeyDown(event, index)}
                   className={`group flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
                     isActive
