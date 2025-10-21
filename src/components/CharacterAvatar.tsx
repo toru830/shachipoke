@@ -11,10 +11,10 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
   const sizeClasses = {
     small: 'w-16 h-16 text-2xl',
     medium: 'w-24 h-24 text-4xl',
-    large: 'w-32 h-32 text-6xl',
+    large: 'w-40 h-40 text-6xl',
   };
 
-  const baseClasses = `rounded-full flex items-center justify-center flex-shrink-0 ${sizeClasses[size]} ${className}`;
+  const baseClasses = `flex items-center justify-center flex-shrink-0 ${sizeClasses[size]} ${className}`;
 
   // 社畜診断のキャラクターアイコンを使用する場合
   if (character.appearance.characterId) {
@@ -25,14 +25,11 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
       imagePath: `./characters/${characterId}.png`
     });
     return (
-      <div 
-        className={baseClasses}
-        style={{ backgroundColor: character.appearance.color, ...style }}
-      >
+      <div className={baseClasses} style={style}>
         <img 
           src={`./characters/${characterId}.png`}
           alt={character.name}
-          className="w-full h-full object-cover rounded-full"
+          className="w-full h-full object-contain drop-shadow-lg"
           onError={(e) => {
             console.error('Failed to load character image:', `./characters/${characterId}.png`);
             // エラー時はデフォルトの絵文字を表示
@@ -49,11 +46,10 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
 
   // 絵文字またはデフォルト絵文字を表示
   return (
-    <div 
-      className={baseClasses}
-      style={{ backgroundColor: character.appearance.color, ...style }}
-    >
-      {character.appearance.emoji || '🧑‍💼'}
+    <div className={baseClasses} style={style}>
+      <div className="text-6xl drop-shadow-lg">
+        {character.appearance.emoji || '🧑‍💼'}
+      </div>
     </div>
   );
 };
