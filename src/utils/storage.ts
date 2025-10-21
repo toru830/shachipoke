@@ -30,6 +30,36 @@ export const clearGameState = (): void => {
   }
 };
 
+// 毎日のイベント管理
+export const resetDailyEvents = (gameState: GameState): GameState => {
+  const today = new Date().toDateString();
+  const lastPlayDate = new Date(gameState.lastPlayDate).toDateString();
+  
+  if (today !== lastPlayDate) {
+    return {
+      ...gameState,
+      lastPlayDate: new Date().toISOString(),
+      dailyEvents: {
+        boss: false,
+        officeLady: false,
+        customer: false,
+      },
+    };
+  }
+  
+  return gameState;
+};
+
+export const completeDailyEvent = (gameState: GameState, eventType: 'boss' | 'officeLady' | 'customer'): GameState => {
+  return {
+    ...gameState,
+    dailyEvents: {
+      ...gameState.dailyEvents,
+      [eventType]: true,
+    },
+  };
+};
+
 export const createDefaultCharacter = (): Character => {
   return {
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
@@ -65,6 +95,11 @@ export const createDefaultGameState = (character: Character): GameState => {
       musicEnabled: true,
       notificationsEnabled: true,
       autoSave: true,
+    },
+    dailyEvents: {
+      boss: false,
+      officeLady: false,
+      customer: false,
     },
   };
 };

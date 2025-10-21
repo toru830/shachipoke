@@ -28,6 +28,11 @@ export interface GameState {
   events: string[];
   achievements: Achievement[];
   settings: GameSettings;
+  dailyEvents: {
+    boss: boolean;
+    officeLady: boolean;
+    customer: boolean;
+  };
 }
 
 export interface Achievement {

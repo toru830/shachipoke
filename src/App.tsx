@@ -5,7 +5,8 @@ import {
   saveGameState, 
   getCharacterFromURL,
   createDefaultCharacter,
-  createDefaultGameState
+  createDefaultGameState,
+  resetDailyEvents
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
 import { getDiagnosisFromURL, convertDiagnosisToCharacter } from './utils/diagnosisConverter';
@@ -47,6 +48,11 @@ function App() {
               notificationsEnabled: true,
               autoSave: true,
             },
+            dailyEvents: {
+              boss: false,
+              officeLady: false,
+              customer: false,
+            },
           };
           setGameState(newGameState);
           saveGameState(newGameState);
@@ -79,7 +85,10 @@ function App() {
       // URLにデータがない場合、既存のセーブデータを確認
       const savedState = loadGameState();
       if (savedState) {
-        setGameState(savedState);
+        // 毎日のイベントをリセット
+        const resetState = resetDailyEvents(savedState);
+        setGameState(resetState);
+        saveGameState(resetState);
         setCurrentScreen('home');
       } else {
         // セーブデータもない場合、デフォルトキャラクターで開始

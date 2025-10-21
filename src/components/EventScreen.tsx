@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GameState } from '../types/character';
-import { getRandomEvent, Event } from '../data/events';
+import { dailyEvents, Event } from '../data/events';
 import { addExp, addMoney, updateStat } from '../utils/gameLogic';
+import { completeDailyEvent } from '../utils/storage';
 
 interface EventScreenProps {
   gameState: GameState;
@@ -12,16 +13,20 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [eventHistory, setEventHistory] = useState<string[]>([]);
+  const [eventType, setEventType] = useState<'boss' | 'officeLady' | 'customer' | null>(null);
 
-  useEffect(() => {
-    if (!currentEvent) {
-      const newEvent = getRandomEvent();
-      setCurrentEvent(newEvent);
-      setSelectedChoice(null);
-      setShowResult(false);
-    }
-  }, [currentEvent]);
+  const getRandomEventByType = (type: 'boss' | 'officeLady' | 'customer'): Event => {
+    const events = dailyEvents[type];
+    return events[Math.floor(Math.random() * events.length)];
+  };
+
+  const startEvent = (type: 'boss' | 'officeLady' | 'customer') => {
+    const event = getRandomEventByType(type);
+    setCurrentEvent(event);
+    setEventType(type);
+    setSelectedChoice(null);
+    setShowResult(false);
+  };
 
   const handleChoice = (choiceIndex: number) => {
     if (!currentEvent) return;
@@ -31,7 +36,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
   };
 
   const confirmChoice = () => {
-    if (!currentEvent || selectedChoice === null) return;
+    if (!currentEvent || selectedChoice === null || !eventType) return;
 
     const choice = currentEvent.choices[selectedChoice];
     if (!choice) return;
@@ -65,29 +70,106 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
       });
     }
 
-    // イベント履歴に追加
-    const eventText = `${currentEvent.title}: ${choice.text}`;
-    setEventHistory(prev => [...prev, eventText]);
+    // イベントを完了としてマーク
+    newGameState = completeDailyEvent(newGameState, eventType);
 
     // ゲーム状態を更新
     onGameStateUpdate(newGameState);
 
-    // 新しいイベントを生成
+    // イベントをリセット
     setCurrentEvent(null);
+    setEventType(null);
   };
 
-  const triggerNewEvent = () => {
-    setCurrentEvent(null);
-  };
 
   if (!currentEvent) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-20">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">イベント</h1>
-          <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">新しいイベントを生成中...</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-6 text-center">今日の質疑応答</h1>
+          
+          <div className="space-y-4">
+            {/* 上司からの呼び出し */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-6 border-2 border-red-200 shadow-lg">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">😠</div>
+                <h2 className="text-xl font-bold text-red-800 mb-2">上司から呼ばれた！</h2>
+                <p className="text-red-600 text-sm">怖い上司から理不尽なことを言われます</p>
+              </div>
+              <button
+                onClick={() => startEvent('boss')}
+                disabled={gameState.dailyEvents.boss}
+                className={`w-full py-3 px-4 rounded-xl font-bold text-lg transition-all ${
+                  gameState.dailyEvents.boss
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transform hover:scale-105'
+                }`}
+              >
+                {gameState.dailyEvents.boss ? '✅ 完了済み' : '開始する'}
+              </button>
+            </div>
+
+            {/* お局様からの小言 */}
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">👵</div>
+                <h2 className="text-xl font-bold text-purple-800 mb-2">お局様からの小言だ！</h2>
+                <p className="text-purple-600 text-sm">年配のお局様から面倒くさい小言を言われます</p>
+              </div>
+              <button
+                onClick={() => startEvent('officeLady')}
+                disabled={gameState.dailyEvents.officeLady}
+                className={`w-full py-3 px-4 rounded-xl font-bold text-lg transition-all ${
+                  gameState.dailyEvents.officeLady
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 transform hover:scale-105'
+                }`}
+              >
+                {gameState.dailyEvents.officeLady ? '✅ 完了済み' : '開始する'}
+              </button>
+            </div>
+
+            {/* お客からの電話 */}
+            <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-6 border-2 border-orange-200 shadow-lg">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">📞</div>
+                <h2 className="text-xl font-bold text-orange-800 mb-2">お客からの電話だ！</h2>
+                <p className="text-orange-600 text-sm">厳しいお客さんからネチネチと嫌味を言われます</p>
+              </div>
+              <button
+                onClick={() => startEvent('customer')}
+                disabled={gameState.dailyEvents.customer}
+                className={`w-full py-3 px-4 rounded-xl font-bold text-lg transition-all ${
+                  gameState.dailyEvents.customer
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600 transform hover:scale-105'
+                }`}
+              >
+                {gameState.dailyEvents.customer ? '✅ 完了済み' : '開始する'}
+              </button>
+            </div>
+          </div>
+
+          {/* 進捗表示 */}
+          <div className="mt-6 bg-gradient-to-br from-white to-blue-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg">
+            <h3 className="text-lg font-bold text-blue-800 mb-3 text-center">今日の進捗</h3>
+            <div className="flex justify-center gap-4">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                gameState.dailyEvents.boss ? 'bg-green-500' : 'bg-gray-300'
+              }`}>
+                {gameState.dailyEvents.boss ? '✓' : '1'}
+              </div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                gameState.dailyEvents.officeLady ? 'bg-green-500' : 'bg-gray-300'
+              }`}>
+                {gameState.dailyEvents.officeLady ? '✓' : '2'}
+              </div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                gameState.dailyEvents.customer ? 'bg-green-500' : 'bg-gray-300'
+              }`}>
+                {gameState.dailyEvents.customer ? '✓' : '3'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -150,30 +232,13 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
           )}
         </div>
 
-        {/* イベント履歴 */}
-        {eventHistory.length > 0 && (
-          <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <span>📝</span>
-              イベント履歴
-            </h3>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {eventHistory.slice(-5).map((event, index) => (
-                <div key={index} className="text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-                  {event}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 新しいイベントボタン */}
+        {/* 戻るボタン */}
         <div className="mt-4 text-center">
           <button
-            onClick={triggerNewEvent}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg"
+            onClick={() => setCurrentEvent(null)}
+            className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg"
           >
-            新しいイベント
+            戻る
           </button>
         </div>
       </div>
