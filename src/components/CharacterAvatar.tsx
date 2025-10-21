@@ -26,16 +26,16 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
     console.log('Loading character image:', {
       characterId: character.appearance.characterId,
       paddedId: characterId,
-      imagePath: `/characters/${characterId}.png`
+      imagePath: `./characters/${characterId}.png`
     });
     return (
       <div className={baseClasses} style={style}>
         <img 
-          src={`/characters/${characterId}.png`}
+          src={`./characters/${characterId}.png`}
           alt={character.name}
           className="w-full h-full object-contain drop-shadow-lg"
           onError={(e) => {
-            console.error('Failed to load character image:', `/characters/${characterId}.png`);
+            console.error('Failed to load character image:', `./characters/${characterId}.png`);
             // エラー時はデフォルトの絵文字を表示
             e.currentTarget.style.display = 'none';
             const parent = e.currentTarget.parentElement;
