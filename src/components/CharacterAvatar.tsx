@@ -23,24 +23,28 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
   
   if (character.appearance.characterId && typeof character.appearance.characterId === 'number' && character.appearance.characterId >= 1 && character.appearance.characterId <= 16) {
     const characterId = character.appearance.characterId.toString().padStart(3, '0');
+    const imagePath = `./characters/${characterId}.png`;
     console.log('Loading character image:', {
       characterId: character.appearance.characterId,
       paddedId: characterId,
-      imagePath: `./characters/${characterId}.png`
+      imagePath: imagePath
     });
+    
     return (
       <div className={baseClasses} style={style}>
         <img 
-          src={`./characters/${characterId}.png`}
+          src={imagePath}
           alt={character.name}
           className="w-full h-full object-contain drop-shadow-lg"
+          onLoad={() => console.log('Image loaded successfully:', imagePath)}
           onError={(e) => {
-            console.error('Failed to load character image:', `./characters/${characterId}.png`);
+            console.error('Failed to load character image:', imagePath);
+            console.error('Error details:', e);
             // エラー時はデフォルトの絵文字を表示
             e.currentTarget.style.display = 'none';
             const parent = e.currentTarget.parentElement;
             if (parent) {
-              parent.innerHTML = character.appearance.emoji || '🧑‍💼';
+              parent.innerHTML = `<div class="text-6xl drop-shadow-lg">${character.appearance.emoji || '🧑‍💼'}</div>`;
             }
           }}
         />
