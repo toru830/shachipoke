@@ -87,11 +87,19 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
   let validCharacterId: number | undefined;
   const characterIdNum = parseInt(diagnosisChar.characterId, 10);
   
+  console.log('Character ID processing:', {
+    characterId: diagnosisChar.characterId,
+    characterIdNum: characterIdNum,
+    isNaN: isNaN(characterIdNum)
+  });
+  
   if (!isNaN(characterIdNum)) {
     // 数値の場合（001 -> 1）
+    console.log('Processing as number');
     validCharacterId = characterIdNum;
   } else {
     // 文字列の場合（PACE, KIND等）を数値IDにマッピング
+    console.log('Processing as string, calling getCharacterIdFromString');
     validCharacterId = getCharacterIdFromString(diagnosisChar.characterId);
   }
   
