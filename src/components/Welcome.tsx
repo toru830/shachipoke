@@ -18,8 +18,7 @@ const Welcome: React.FC<WelcomeProps> = ({ character, onStart }) => {
             <CharacterAvatar character={character} size="large" />
           </div>
           
-          <h2 className="text-xl font-bold text-gray-800 mb-2">{character.name}</h2>
-          <p className="text-gray-600 mb-6">{character.type}</p>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">{character.name}</h2>
           
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <h3 className="font-bold text-gray-800 mb-2">あなたの統計値</h3>

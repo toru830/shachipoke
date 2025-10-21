@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { GameState } from './types/character';
-import { 
-  loadGameState, 
-  saveGameState, 
+import {
+  loadGameState,
+  saveGameState,
   createDefaultCharacter,
   createDefaultGameState,
+  normalizeGameState,
   resetDailyEvents
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
@@ -40,8 +41,10 @@ function App() {
         console.log('App.tsx - converted character:', character);
         if (character) {
           console.log('App.tsx - character created successfully, setting game state');
-          const newGameState: GameState = {
+          const newGameState: GameState = normalizeGameState({
             character: character,
+            ownedCharacters: [character],
+            formation: [character.id],
             money: 50,
             lastPlayDate: new Date().toISOString(),
             events: [],
@@ -57,7 +60,7 @@ function App() {
               officeLady: false,
               customer: false,
             },
-          };
+          });
           setGameState(newGameState);
           saveGameState(newGameState);
           setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
@@ -70,7 +73,7 @@ function App() {
       const savedState = loadGameState();
       if (savedState) {
         // 毎日のイベントをリセット
-        const resetState = resetDailyEvents(savedState);
+        const resetState = normalizeGameState(resetDailyEvents(savedState));
         setGameState(resetState);
         saveGameState(resetState);
         setCurrentScreen('home');
@@ -89,6 +92,12 @@ function App() {
 
   const navigateToScreen = (screen: Screen) => {
     setCurrentScreen(screen);
+  };
+
+  const updateGameState = (newGameState: GameState) => {
+    const normalized = normalizeGameState(newGameState);
+    setGameState(normalized);
+    saveGameState(normalized);
   };
 
   const completeIntro = () => {
@@ -129,40 +138,36 @@ function App() {
         />
       )}
       {currentScreen === 'event' && (
-        <EventScreen 
-          gameState={gameState} 
+        <EventScreen
+          gameState={gameState}
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            updateGameState(newGameState);
+          }}
         />
       )}
       {currentScreen === 'shop' && (
-        <ShopScreen 
-          gameState={gameState} 
+        <ShopScreen
+          gameState={gameState}
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            updateGameState(newGameState);
+          }}
         />
       )}
       {currentScreen === 'formation' && (
-        <FormationScreen 
-          gameState={gameState} 
+        <FormationScreen
+          gameState={gameState}
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            updateGameState(newGameState);
+          }}
         />
       )}
       {currentScreen === 'settings' && (
-        <SettingsScreen 
-          settings={gameState.settings} 
+        <SettingsScreen
+          settings={gameState.settings}
           onSettingsUpdate={(newSettings) => {
             const newGameState = { ...gameState, settings: newSettings };
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            updateGameState(newGameState);
+          }}
         />
       )}
 

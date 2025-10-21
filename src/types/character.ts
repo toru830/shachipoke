@@ -23,6 +23,8 @@ export interface Character {
 
 export interface GameState {
   character: Character;
+  ownedCharacters: Character[];
+  formation: string[];
   money: number;
   lastPlayDate: string;
   events: string[];
