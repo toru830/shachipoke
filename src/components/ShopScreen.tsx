@@ -58,30 +58,30 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
   const filteredItems = getShopItemsByCategory(selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-32">
       <div className="max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">ショップ</h1>
-        
+
         {/* お金の表示 */}
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4 w-full justify-center">
           <span className="text-lg">💰</span>
-          <span className="font-bold">${gameState.money} シャチ</span>
+          <span className="font-bold">{gameState.money} シャチ</span>
         </div>
 
         {/* カテゴリ選択 */}
-        <div className="flex gap-2 mb-4 overflow-x-auto">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
+              aria-label={category.name}
+              className={`flex items-center justify-center text-xl px-0 py-3 rounded-xl transition-colors ${
                 selectedCategory === category.id
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
               <span>{category.icon}</span>
-              <span className="text-sm">{category.name}</span>
             </button>
           ))}
         </div>
@@ -119,7 +119,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
                 </div>
                 
                 <div className="text-right">
-                  <div className="text-lg font-bold text-blue-600">${item.price}</div>
+                  <div className="text-lg font-bold text-blue-600">💰 {item.price}</div>
                   <button
                     onClick={() => handlePurchase(item)}
                     disabled={gameState.money < item.price}

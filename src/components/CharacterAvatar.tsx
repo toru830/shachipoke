@@ -11,7 +11,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
   const sizeClasses = {
     small: 'w-16 h-16 text-2xl',
     medium: 'w-24 h-24 text-4xl',
-    large: 'w-40 h-40 text-6xl',
+    large: 'w-80 h-80 text-8xl',
   };
 
   const baseClasses = `flex items-center justify-center flex-shrink-0 ${sizeClasses[size]} ${className}`;

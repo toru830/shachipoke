@@ -2,6 +2,60 @@ import { GameState, Character } from '../types/character';
 
 const STORAGE_KEY = 'shachipoke-game-state';
 
+const ensureUniqueCharacters = (characters: Character[]): Character[] => {
+  const seen = new Set<string>();
+  const unique: Character[] = [];
+
+  characters.forEach((character) => {
+    if (!seen.has(character.id)) {
+      unique.push(character);
+      seen.add(character.id);
+    }
+  });
+
+  return unique;
+};
+
+export const normalizeGameState = (gameState: GameState): GameState => {
+  const ownedSource = Array.isArray(gameState.ownedCharacters)
+    ? gameState.ownedCharacters
+    : [];
+
+  const ownedCharacters = ensureUniqueCharacters([
+    ...ownedSource,
+    gameState.character,
+  ]);
+
+  const rawFormation = Array.isArray(gameState.formation)
+    ? gameState.formation.filter((id): id is string => typeof id === 'string')
+    : [];
+
+  const filteredFormation = rawFormation.filter((id) =>
+    ownedCharacters.some((character) => character.id === id)
+  );
+
+  const uniqueFormation: string[] = [];
+  [...filteredFormation, gameState.character.id].forEach((id) => {
+    if (!uniqueFormation.includes(id)) {
+      uniqueFormation.push(id);
+    }
+  });
+
+  const trimmedFormation = uniqueFormation.slice(0, 4);
+
+  const activeCharacter =
+    ownedCharacters.find((character) => character.id === trimmedFormation[0]) ??
+    ownedCharacters[0] ??
+    gameState.character;
+
+  return {
+    ...gameState,
+    ownedCharacters,
+    formation: trimmedFormation,
+    character: activeCharacter,
+  };
+};
+
 export const saveGameState = (gameState: GameState): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
@@ -14,7 +68,8 @@ export const loadGameState = (): GameState | null => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed: GameState = JSON.parse(saved);
+      return normalizeGameState(parsed);
     }
   } catch (error) {
     console.error('Failed to load game state:', error);
@@ -84,8 +139,10 @@ export const createDefaultCharacter = (): Character => {
 };
 
 export const createDefaultGameState = (character: Character): GameState => {
-  return {
+  const baseState: GameState = {
     character,
+    ownedCharacters: [character],
+    formation: [character.id],
     money: 50,
     lastPlayDate: new Date().toISOString(),
     events: [],
@@ -102,6 +159,8 @@ export const createDefaultGameState = (character: Character): GameState => {
       customer: false,
     },
   };
+
+  return normalizeGameState(baseState);
 };
 
 // URLパラメータからキャラクター情報を取得（旧バージョン対応）
