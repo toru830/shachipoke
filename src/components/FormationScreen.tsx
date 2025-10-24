@@ -218,7 +218,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
             <h2 className="text-lg font-bold text-gray-800">連隊編成</h2>
             <p className="text-sm text-gray-500">最大4人まで配置できます。枠を選んでからメンバーを選択してください。</p>
           </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
 {formationSlots.map((slot, index) => {
   const character = getCharacterInSlot(slot);
   const isActive = activeSlot === index;
@@ -229,18 +229,18 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
       tabIndex={0}
       onClick={() => selectSlot(index)}
                   onKeyDown={(event) => handleSlotKeyDown(event, index)}
-                  className={`group flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                  className={`group flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 min-w-[200px] ${
                     isActive
                       ? 'border-blue-500 bg-blue-50 shadow-lg'
                       : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow'
                   }`}
                 >
                   <div className="text-xs font-semibold uppercase tracking-widest text-gray-500">連隊{index + 1}</div>
-                  <div className="flex h-36 w-full items-center justify-center">
+                  <div className="flex h-24 w-24 items-center justify-center">
                     {character ? (
                       <CharacterAvatar character={character} size="medium" />
                     ) : (
-                      <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-3xl text-gray-300">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-2xl text-gray-300">
                         +
                       </div>
                     )}
@@ -248,10 +248,10 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
                   {character ? (
                     <>
                       <div>
-                        <div className="text-base font-bold text-gray-800">{character.name}</div>
+                        <div className="text-sm font-bold text-gray-800">{character.name}</div>
                         <div className="text-xs text-gray-500">Lv.{character.level}</div>
                       </div>
-                      <div className="flex flex-wrap justify-center gap-2 text-[11px] text-gray-500">
+                      <div className="flex flex-wrap justify-center gap-1 text-[10px] text-gray-500">
                         {renderStatBadge('ストレス', character.stats.stress)}
                         {renderStatBadge('コミュ力', character.stats.communication)}
                         {renderStatBadge('持久力', character.stats.endurance)}
