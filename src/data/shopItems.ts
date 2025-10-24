@@ -35,15 +35,79 @@ export const shopItems: ShopItem[] = [
     id: 'energy_drink',
     name: 'エナジードリンク',
     description: '疲労回復に効果的なエナジードリンク',
-    price: 15,
+    price: 30,
     category: 'drink',
     effects: {
       stats: {
-        endurance: 5,
-        stress: 3,
+        endurance: 10,
       },
     },
     icon: '🥤',
+  },
+  {
+    id: 'sleeping_bag',
+    name: '寝袋',
+    description: 'どこでも休める万能寝袋',
+    price: 45,
+    category: 'equipment',
+    effects: {
+      stats: {
+        stress: 10,
+      },
+    },
+    icon: '🛌',
+  },
+  {
+    id: 'sub_display',
+    name: 'サブディスプレイ',
+    description: '作業効率がぐんと上がるデュアルモニター',
+    price: 120,
+    category: 'equipment',
+    effects: {
+      stats: {
+        luck: 10,
+      },
+    },
+    icon: '🖥️',
+  },
+  {
+    id: 'trackball_mouse',
+    name: 'トラックボールマウス',
+    description: '長時間操作でも疲れにくい高性能マウス',
+    price: 80,
+    category: 'equipment',
+    effects: {
+      stats: {
+        communication: 10,
+      },
+    },
+    icon: '🖱️',
+  },
+  {
+    id: 'stomach_medicine',
+    name: '胃薬',
+    description: '胃の負担をやわらげる常備薬',
+    price: 25,
+    category: 'food',
+    effects: {
+      stats: {
+        stress: 5,
+      },
+    },
+    icon: '🩺',
+  },
+  {
+    id: 'razor',
+    name: 'ひげ剃り',
+    description: '身だしなみを整えて第一印象アップ',
+    price: 35,
+    category: 'equipment',
+    effects: {
+      stats: {
+        communication: 5,
+      },
+    },
+    icon: '🪒',
   },
   {
     id: 'lunch',

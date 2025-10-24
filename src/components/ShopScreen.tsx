@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
 import { getShopItemsByCategory, ShopItem } from '../data/shopItems';
-import { spendMoney, updateStat } from '../utils/gameLogic';
+import { addExp, spendMoney, updateStat } from '../utils/gameLogic';
 
 interface ShopScreenProps {
   gameState: GameState;
@@ -11,6 +11,13 @@ interface ShopScreenProps {
 const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate }) => {
   const [selectedCategory, setSelectedCategory] = useState<ShopItem['category']>('food');
   const [message, setMessage] = useState<string>('');
+
+  const statInfo: Record<keyof GameState['character']['stats'], { icon: string; label: string }> = {
+    stress: { icon: '😤', label: '耐ストレス' },
+    communication: { icon: '💬', label: 'コミュ力' },
+    endurance: { icon: '💪', label: '体力' },
+    luck: { icon: '🍀', label: '実力' },
+  };
 
   const categories = [
     { id: 'food' as const, name: '食べ物', icon: '🍱' },
@@ -39,12 +46,20 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
     let updatedState = { ...spentState };
 
     // ステータス効果を適用
-    if (item.effects) {
-      Object.entries(item.effects).forEach(([stat, value]) => {
-        if (typeof value === 'number' && value > 0) {
-          updatedState.character = updateStat(updatedState.character, stat as keyof typeof gameState.character.stats, value);
+    if (item.effects?.stats) {
+      Object.entries(item.effects.stats).forEach(([stat, value]) => {
+        if (typeof value === 'number') {
+          updatedState.character = updateStat(
+            updatedState.character,
+            stat as keyof typeof updatedState.character.stats,
+            value
+          );
         }
       });
+    }
+
+    if (item.effects?.exp) {
+      updatedState.character = addExp(updatedState.character, item.effects.exp);
     }
 
     onGameStateUpdate(updatedState);
@@ -118,22 +133,24 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
                 </div>
                 
                 {/* 効果表示 */}
-                {item.effects && (
+                {item.effects?.stats && (
                   <div className="mb-3">
                     <div className="text-xs font-semibold text-gray-500 mb-1">効果:</div>
                     <div className="flex flex-wrap gap-1">
-                      {Object.entries(item.effects).map(([stat, value]) => (
-                        <span
-                          key={stat}
-                          className="bg-gray-100 px-2 py-1 rounded-full text-xs"
-                        >
-                          {stat === 'stress' && '☹️'}
-                          {stat === 'communication' && '💬'}
-                          {stat === 'endurance' && '💪'}
-                          {stat === 'luck' && '🍀'}
-                          {typeof value === 'number' && value > 0 ? '+' : ''}{typeof value === 'number' ? value : ''}
-                        </span>
-                      ))}
+                      {Object.entries(item.effects.stats).map(([stat, value]) => {
+                        const info = statInfo[stat as keyof typeof statInfo];
+                        if (typeof value !== 'number' || !info) return null;
+                        const formattedValue = value > 0 ? `+${value}` : `${value}`;
+
+                        return (
+                          <span
+                            key={stat}
+                            className="bg-gray-100 px-2 py-1 rounded-full text-xs"
+                          >
+                          {info.icon} {info.label} {formattedValue}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
