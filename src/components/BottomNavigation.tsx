@@ -18,7 +18,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentScreen, onNa
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
-      <div className="flex justify-around max-w-md mx-auto">
+      <div className="flex justify-center gap-6 w-full max-w-md mx-auto">
         {navItems.map((item) => (
           <button
             key={item.id}
