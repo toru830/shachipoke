@@ -58,7 +58,7 @@ const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
     <div className="relative w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
       <video
         ref={videoRef}
-        src="./intro-video.mp4"
+        src="/intro-video.mp4"
         className="w-full h-full object-contain"
         autoPlay
         playsInline
