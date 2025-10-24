@@ -15,10 +15,19 @@ import EventScreen from './components/EventScreen';
 import ShopScreen from './components/ShopScreen';
 import FormationScreen from './components/FormationScreen';
 import SettingsScreen from './components/SettingsScreen';
+import VideoGallery from './components/VideoGallery';
 import Welcome from './components/Welcome';
 import BottomNavigation from './components/BottomNavigation';
 
-type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'shop' | 'formation' | 'settings';
+type Screen =
+  | 'intro'
+  | 'welcome'
+  | 'home'
+  | 'event'
+  | 'shop'
+  | 'formation'
+  | 'settings'
+  | 'videoGallery';
 
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -144,21 +153,27 @@ function App() {
         />
       )}
       {currentScreen === 'settings' && (
-        <SettingsScreen 
-          settings={gameState.settings} 
+        <SettingsScreen
+          settings={gameState.settings}
           onSettingsUpdate={(newSettings) => {
             const newGameState = normalizeGameState({ ...gameState, settings: newSettings });
             setGameState(newGameState);
             saveGameState(newGameState);
           }}
+          onOpenVideoGallery={() => setCurrentScreen('videoGallery')}
         />
+      )}
+      {currentScreen === 'videoGallery' && (
+        <VideoGallery onBack={() => setCurrentScreen('settings')} />
       )}
 
       {/* ボトムナビゲーション */}
-      {currentScreen !== 'intro' && currentScreen !== 'welcome' && (
-        <BottomNavigation 
-          currentScreen={currentScreen} 
-          onNavigate={navigateToScreen} 
+      {currentScreen !== 'intro' &&
+        currentScreen !== 'welcome' &&
+        currentScreen !== 'videoGallery' && (
+        <BottomNavigation
+          currentScreen={currentScreen}
+          onNavigate={navigateToScreen}
         />
       )}
     </div>

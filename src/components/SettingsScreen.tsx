@@ -4,9 +4,10 @@ import { GameSettings } from '../types/character';
 interface SettingsScreenProps {
   settings: GameSettings;
   onSettingsUpdate: (newSettings: GameSettings) => void;
+  onOpenVideoGallery: () => void;
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSettingsUpdate }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSettingsUpdate, onOpenVideoGallery }) => {
   const [localSettings, setLocalSettings] = useState<GameSettings>(settings);
 
   const handleSettingChange = (key: keyof GameSettings, value: boolean) => {
@@ -29,7 +30,23 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSettingsUpd
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
       <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">設定</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">設定</h1>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-1">
+              <div className="w-full rounded-lg bg-blue-600 text-white text-center py-3 font-semibold shadow-sm">
+                設定
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenVideoGallery}
+              className="col-span-1 w-full rounded-lg border border-blue-200 bg-white py-3 text-center font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+            >
+              動画
+            </button>
+          </div>
+        </div>
         
         {/* 音声設定 */}
         <div className="bg-white rounded-xl p-6 border border-gray-200 mb-4">
@@ -112,6 +129,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSettingsUpd
         {/* リセットボタン */}
         <div className="text-center">
           <button
+            type="button"
             onClick={resetSettings}
             className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
           >
