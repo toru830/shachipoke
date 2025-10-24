@@ -6,7 +6,7 @@ import {
   CharacterTemplate,
   createCharacterFromTemplate,
 } from '../data/characterCatalog';
-import { spendMoney } from '../utils/gameLogic';
+import { spendCurrency } from '../utils/gameLogic';
 
 interface FormationScreenProps {
   gameState: GameState;
@@ -21,7 +21,7 @@ const formatType = (type: string): string => {
 
 const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStateUpdate }) => {
   const getInitialSlots = () => {
-    const base = Array.from({ length: MAX_FORMATION_SIZE }, (_, index) => gameState.formation?.[index] ?? null);
+    const base = Array.from({ length: MAX_FORMATION_SIZE }, (_, index) => gameState.formations?.[index] ?? null);
     return base as (string | null)[];
   };
 
@@ -39,7 +39,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
     setFormationSlots(slots);
     const firstEmpty = slots.findIndex((slot) => slot === null);
     setActiveSlot(firstEmpty >= 0 ? firstEmpty : 0);
-  }, [gameState.formation]);
+  }, [gameState.formations]);
 
   useEffect(() => {
     return () => {
@@ -58,8 +58,8 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
   };
 
   const ownedCharacters = useMemo(() => {
-    const owned = Array.isArray(gameState.ownedCharacters) && gameState.ownedCharacters.length > 0
-      ? gameState.ownedCharacters
+    const owned = Array.isArray(gameState.purchasedCharacters) && gameState.purchasedCharacters.length > 0
+      ? gameState.purchasedCharacters
       : [gameState.character];
     const seen = new Set<string>();
     return owned.filter((character) => {
@@ -69,7 +69,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
       seen.add(character.id);
       return true;
     });
-  }, [gameState.character, gameState.ownedCharacters]);
+  }, [gameState.character, gameState.purchasedCharacters]);
 
   const ownedCharacterMap = useMemo(() => {
     const map = new Map<string, Character>();
@@ -130,12 +130,12 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
   };
 
   const handlePurchase = (template: CharacterTemplate) => {
-    if (gameState.money < template.price) {
+    if (gameState.currency < template.price) {
       showMessage('お金が足りません！');
       return;
     }
 
-    const spentState = spendMoney(gameState, template.price);
+    const spentState = spendCurrency(gameState, template.price);
     if (!spentState) {
       showMessage('お金が足りません！');
       return;
@@ -146,7 +146,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
 
     onGameStateUpdate({
       ...spentState,
-      ownedCharacters: updatedOwned,
+      purchasedCharacters: updatedOwned,
     });
 
     setFormationSlots((prev) => {
@@ -173,8 +173,8 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
 
     const updatedGameState: GameState = {
       ...gameState,
-      ownedCharacters,
-      formation: selectedIds,
+      purchasedCharacters: ownedCharacters,
+      formations: selectedIds,
       character: leader,
     };
 
@@ -203,7 +203,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
           <h1 className="text-2xl font-bold text-gray-800">編成</h1>
           <div className="inline-flex items-center gap-2 self-start rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-gray-700 shadow">
             <span>💰</span>
-            <span>{gameState.money}</span>
+            <span>{gameState.currency}</span>
           </div>
         </div>
 
@@ -367,9 +367,9 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
                       <button
                         type="button"
                         onClick={() => handlePurchase(template)}
-                        disabled={gameState.money < template.price}
+                        disabled={gameState.currency < template.price}
                         className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                          gameState.money >= template.price
+                          gameState.currency >= template.price
                             ? 'bg-emerald-500 text-white hover:bg-emerald-600'
                             : 'bg-gray-200 text-gray-400'
                         }`}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
 import { getShopItemsByCategory, ShopItem } from '../data/shopItems';
-import { spendMoney, updateStat, addExp } from '../utils/gameLogic';
+import { spendCurrency, updateStat, addExp } from '../utils/gameLogic';
 
 interface ShopScreenProps {
   gameState: GameState;
@@ -20,13 +20,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
   ];
 
   const handlePurchase = (item: ShopItem) => {
-    if (gameState.money < item.price) {
+    if (gameState.currency < item.price) {
       setMessage('お金が足りません！');
       setTimeout(() => setMessage(''), 3000);
       return;
     }
 
-    let newGameState = spendMoney(gameState, item.price);
+    let newGameState = spendCurrency(gameState, item.price);
     if (!newGameState) {
       setMessage('購入に失敗しました！');
       setTimeout(() => setMessage(''), 3000);
@@ -50,7 +50,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
       newGameState.character = addExp(newGameState.character, item.effects.exp);
     }
 
-    onGameStateUpdate(newGameState);
+    const updatedOwnedItems = Array.from(
+      new Set([...(newGameState.ownedItems ?? []), item.id])
+    );
+
+    onGameStateUpdate({
+      ...newGameState,
+      ownedItems: updatedOwnedItems,
+    });
     setMessage(`${item.name}を購入しました！`);
     setTimeout(() => setMessage(''), 3000);
   };
@@ -65,7 +72,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
         {/* お金の表示 */}
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4 w-full justify-center">
           <span className="text-lg">💰</span>
-          <span className="font-bold">{gameState.money} シャチ</span>
+          <span className="font-bold">{gameState.currency} シャチ</span>
         </div>
 
         {/* カテゴリ選択 */}
@@ -122,9 +129,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
                   <div className="text-lg font-bold text-blue-600">💰 {item.price}</div>
                   <button
                     onClick={() => handlePurchase(item)}
-                    disabled={gameState.money < item.price}
+                    disabled={gameState.currency < item.price}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      gameState.money >= item.price
+                      gameState.currency >= item.price
                         ? 'bg-blue-500 text-white hover:bg-blue-600'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}

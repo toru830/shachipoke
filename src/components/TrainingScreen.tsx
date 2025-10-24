@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
 import { getTrainingsByLevel, Training } from '../data/training';
-import { spendMoney, updateStat, addExp } from '../utils/gameLogic';
+import { spendCurrency, updateStat, addExp } from '../utils/gameLogic';
 
 interface TrainingScreenProps {
   gameState: GameState;
@@ -16,7 +16,7 @@ const TrainingScreen: React.FC<TrainingScreenProps> = ({ gameState, onGameStateU
   const availableTrainings = getTrainingsByLevel(gameState.character.level);
 
   const handleStartTraining = (training: Training) => {
-    if (gameState.money < training.cost) {
+    if (gameState.currency < training.cost) {
       setMessage('お金が足りません！');
       setTimeout(() => setMessage(''), 3000);
       return;
@@ -27,7 +27,7 @@ const TrainingScreen: React.FC<TrainingScreenProps> = ({ gameState, onGameStateU
     setMessage(`${training.name}を開始しました！`);
 
     // トレーニングの効果を即座に適用（実際のゲームでは時間をかける）
-    let newGameState = spendMoney(gameState, training.cost);
+    let newGameState = spendCurrency(gameState, training.cost);
     if (!newGameState) return;
 
     // 統計値を更新
@@ -67,7 +67,7 @@ const TrainingScreen: React.FC<TrainingScreenProps> = ({ gameState, onGameStateU
         {/* お金の表示 */}
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4 w-full justify-center">
           <span className="text-lg">💰</span>
-          <span className="font-bold">${gameState.money} シャチ</span>
+          <span className="font-bold">${gameState.currency} シャチ</span>
         </div>
 
         {/* メッセージ */}
@@ -118,9 +118,9 @@ const TrainingScreen: React.FC<TrainingScreenProps> = ({ gameState, onGameStateU
                 <div className="text-right">
                   <button
                     onClick={() => handleStartTraining(training)}
-                    disabled={isTraining || gameState.money < training.cost}
+                    disabled={isTraining || gameState.currency < training.cost}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      !isTraining && gameState.money >= training.cost
+                      !isTraining && gameState.currency >= training.cost
                         ? 'bg-green-500 text-white hover:bg-green-600'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}

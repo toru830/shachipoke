@@ -114,10 +114,10 @@ export const checkAchievements = (gameState: any): Achievement[] => {
   }
   
   // お金関連の実績
-  if (gameState.money > 0 && !gameState.achievements.find((a: Achievement) => a.id === 'first_money')) {
+  if (gameState.currency > 0 && !gameState.achievements.find((a: Achievement) => a.id === 'first_money')) {
     newAchievements.push({ ...achievements.find(a => a.id === 'first_money')!, unlockedAt: new Date().toISOString() });
   }
-  if (gameState.money >= 1000 && !gameState.achievements.find((a: Achievement) => a.id === 'rich')) {
+  if (gameState.currency >= 1000 && !gameState.achievements.find((a: Achievement) => a.id === 'rich')) {
     newAchievements.push({ ...achievements.find(a => a.id === 'rich')!, unlockedAt: new Date().toISOString() });
   }
   

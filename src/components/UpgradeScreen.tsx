@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
-import { updateStat, spendMoney } from '../utils/gameLogic';
+import { updateStat, spendCurrency } from '../utils/gameLogic';
 
 interface UpgradeScreenProps {
   gameState: GameState;
@@ -20,7 +20,7 @@ const UpgradeScreen: React.FC<UpgradeScreenProps> = ({ gameState, onGameStateUpd
   const handleUpgrade = (statName: keyof typeof gameState.character.stats) => {
     const cost = upgradeCosts[statName];
     
-    if (gameState.money < cost) {
+    if (gameState.currency < cost) {
       setMessage('お金が足りません！');
       setTimeout(() => setMessage(''), 3000);
       return;
@@ -32,7 +32,7 @@ const UpgradeScreen: React.FC<UpgradeScreenProps> = ({ gameState, onGameStateUpd
       return;
     }
 
-    let newGameState = spendMoney(gameState, cost);
+    let newGameState = spendCurrency(gameState, cost);
     if (!newGameState) return;
 
     newGameState.character = updateStat(newGameState.character, statName, 5);
@@ -70,7 +70,7 @@ const UpgradeScreen: React.FC<UpgradeScreenProps> = ({ gameState, onGameStateUpd
         {/* お金の表示 */}
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4 w-full justify-center">
           <span className="text-lg">💰</span>
-          <span className="font-bold">${gameState.money} シャチ</span>
+          <span className="font-bold">${gameState.currency} シャチ</span>
         </div>
 
         {/* メッセージ */}
@@ -96,9 +96,9 @@ const UpgradeScreen: React.FC<UpgradeScreenProps> = ({ gameState, onGameStateUpd
                   <div className="text-lg font-bold text-blue-600">${upgradeCosts[stat as keyof typeof upgradeCosts]}</div>
                   <button
                     onClick={() => handleUpgrade(stat as keyof typeof gameState.character.stats)}
-                    disabled={gameState.money < upgradeCosts[stat as keyof typeof upgradeCosts] || value >= 100}
+                    disabled={gameState.currency < upgradeCosts[stat as keyof typeof upgradeCosts] || value >= 100}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      gameState.money >= upgradeCosts[stat as keyof typeof upgradeCosts] && value < 100
+                      gameState.currency >= upgradeCosts[stat as keyof typeof upgradeCosts] && value < 100
                         ? 'bg-blue-500 text-white hover:bg-blue-600'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}

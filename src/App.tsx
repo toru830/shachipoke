@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GameState } from './types/character';
 import {
   loadGameState,
   saveGameState,
   createDefaultCharacter,
   createDefaultGameState,
-  normalizeGameState,
   resetDailyEvents
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
@@ -23,6 +22,9 @@ type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'shop' | 'formation' | 's
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>('intro');
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const initGame = () => {
@@ -41,28 +43,10 @@ function App() {
         console.log('App.tsx - converted character:', character);
         if (character) {
           console.log('App.tsx - character created successfully, setting game state');
-          const newGameState: GameState = normalizeGameState({
-            character: character,
-            ownedCharacters: [character],
-            formation: [character.id],
-            money: 50,
-            lastPlayDate: new Date().toISOString(),
-            events: [],
-            achievements: [],
-            settings: {
-              soundEnabled: true,
-              musicEnabled: true,
-              notificationsEnabled: true,
-              autoSave: true,
-            },
-            dailyEvents: {
-              boss: false,
-              officeLady: false,
-              customer: false,
-            },
-          });
-          setGameState(newGameState);
-          saveGameState(newGameState);
+          const createdState = createDefaultGameState(character);
+          const savedState = saveGameState(createdState);
+          setGameState(savedState);
+          setLastSavedTime(savedState.lastSaved);
           setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
           return;
         }
@@ -73,21 +57,29 @@ function App() {
       const savedState = loadGameState();
       if (savedState) {
         // 毎日のイベントをリセット
-        const resetState = normalizeGameState(resetDailyEvents(savedState));
-        setGameState(resetState);
-        saveGameState(resetState);
+        const resetState = resetDailyEvents(savedState);
+        const persistedState = saveGameState(resetState);
+        setGameState(persistedState);
+        setLastSavedTime(persistedState.lastSaved);
         setCurrentScreen('home');
       } else {
         // セーブデータもない場合、デフォルトキャラクターで開始
         const defaultCharacter = createDefaultCharacter();
         const newGameState = createDefaultGameState(defaultCharacter);
-        setGameState(newGameState);
-        saveGameState(newGameState);
+        const savedDefault = saveGameState(newGameState);
+        setGameState(savedDefault);
+        setLastSavedTime(savedDefault.lastSaved);
         setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
       }
     };
-    
+
     initGame();
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, []);
 
   const navigateToScreen = (screen: Screen) => {
@@ -95,9 +87,21 @@ function App() {
   };
 
   const updateGameState = (newGameState: GameState) => {
-    const normalized = normalizeGameState(newGameState);
-    setGameState(normalized);
-    saveGameState(normalized);
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    setIsSaving(true);
+    const savedState = saveGameState({
+      ...newGameState,
+    });
+    setGameState(savedState);
+    setLastSavedTime(savedState.lastSaved);
+
+    saveTimeoutRef.current = setTimeout(() => {
+      setIsSaving(false);
+      saveTimeoutRef.current = null;
+    }, 600);
   };
 
   const completeIntro = () => {
@@ -132,9 +136,9 @@ function App() {
         />
       )}
       {currentScreen === 'home' && (
-        <Home 
-          character={gameState.character} 
-          money={gameState.money} 
+        <Home
+          character={gameState.character}
+          currency={gameState.currency}
         />
       )}
       {currentScreen === 'event' && (
@@ -173,10 +177,26 @@ function App() {
 
       {/* ボトムナビゲーション */}
       {currentScreen !== 'intro' && currentScreen !== 'welcome' && (
-        <BottomNavigation 
-          currentScreen={currentScreen} 
-          onNavigate={navigateToScreen} 
+        <BottomNavigation
+          currentScreen={currentScreen}
+          onNavigate={navigateToScreen}
         />
+      )}
+
+      {currentScreen !== 'intro' && currentScreen !== 'welcome' && (
+        <div className="fixed bottom-24 right-4 z-50">
+          <div
+            className={`rounded-full px-4 py-2 text-sm shadow-lg transition-colors ${
+              isSaving ? 'bg-blue-500 text-white' : 'bg-white/90 text-gray-700'
+            }`}
+          >
+            {isSaving
+              ? '💾 保存中...'
+              : lastSavedTime
+              ? `💾 保存済み ${new Date(lastSavedTime).toLocaleTimeString()}`
+              : '💾 保存準備完了'}
+          </div>
+        </div>
       )}
     </div>
   );

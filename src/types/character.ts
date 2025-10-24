@@ -23,9 +23,11 @@ export interface Character {
 
 export interface GameState {
   character: Character;
-  ownedCharacters: Character[];
-  formation: string[];
-  money: number;
+  purchasedCharacters: Character[];
+  ownedItems: string[];
+  formations: string[];
+  currency: number;
+  lastSaved: string;
   lastPlayDate: string;
   events: string[];
   achievements: Achievement[];

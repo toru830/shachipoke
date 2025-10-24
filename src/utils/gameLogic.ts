@@ -32,18 +32,18 @@ export const addExp = (character: Character, exp: number): Character => {
   };
 };
 
-export const addMoney = (gameState: GameState, amount: number): GameState => {
+export const addCurrency = (gameState: GameState, amount: number): GameState => {
   return {
     ...gameState,
-    money: gameState.money + amount,
+    currency: gameState.currency + amount,
   };
 };
 
-export const spendMoney = (gameState: GameState, amount: number): GameState | null => {
-  if (gameState.money >= amount) {
+export const spendCurrency = (gameState: GameState, amount: number): GameState | null => {
+  if (gameState.currency >= amount) {
     return {
       ...gameState,
-      money: gameState.money - amount,
+      currency: gameState.currency - amount,
     };
   }
   return null; // お金が足りない

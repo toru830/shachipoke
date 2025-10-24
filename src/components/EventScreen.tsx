@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
 import { dailyEvents, Event } from '../data/events';
-import { addExp, addMoney, updateStat } from '../utils/gameLogic';
+import { addExp, addCurrency, updateStat } from '../utils/gameLogic';
 import { completeDailyEvent } from '../utils/storage';
 
 interface EventScreenProps {
@@ -51,9 +51,13 @@ const EventScreen: React.FC<EventScreenProps> = ({ gameState, onGameStateUpdate 
     // お金を追加/消費
     if (choice.effects.money) {
       if (choice.effects.money > 0) {
-        newGameState = addMoney(newGameState, choice.effects.money);
+        newGameState = addCurrency(newGameState, choice.effects.money);
       } else {
-        newGameState.money = Math.max(0, newGameState.money + choice.effects.money);
+        const adjustedCurrency = Math.max(0, newGameState.currency + choice.effects.money);
+        newGameState = {
+          ...newGameState,
+          currency: adjustedCurrency,
+        };
       }
     }
 

@@ -3,10 +3,10 @@ import CharacterAvatar from './CharacterAvatar';
 
 interface HomeProps {
   character: Character;
-  money: number;
+  currency: number;
 }
 
-const Home = ({ character, money }: HomeProps) => {
+const Home = ({ character, currency }: HomeProps) => {
   const expPercent = Math.min(100, Math.max(0, (character.exp / character.expToNextLevel) * 100));
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-32 overflow-y-auto">
@@ -15,7 +15,7 @@ const Home = ({ character, money }: HomeProps) => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">シャチポケ</h1>
           <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full shadow-sm text-[11px] font-semibold">
             <span className="text-base">💰</span>
-            <span className="text-sm">{money}</span>
+            <span className="text-sm">{currency}</span>
             <span className="text-[10px] text-gray-500">シャチ</span>
           </div>
         </div>
