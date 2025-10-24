@@ -5,7 +5,8 @@ import {
   saveGameState, 
   createDefaultCharacter,
   createDefaultGameState,
-  resetDailyEvents
+  resetDailyEvents,
+  normalizeGameState
 } from './utils/storage';
 import { getCharacterFromUrl, convertDiagnosisCharacterToCharacter } from './utils/urlParams';
 import IntroVideo from './components/IntroVideo';
@@ -40,26 +41,10 @@ function App() {
         console.log('App.tsx - converted character:', character);
         if (character) {
           console.log('App.tsx - character created successfully, setting game state');
-          const newGameState: GameState = {
-            character: character,
-            money: 50,
-            lastPlayDate: new Date().toISOString(),
-            events: [],
-            achievements: [],
-            settings: {
-              soundEnabled: true,
-              musicEnabled: true,
-              notificationsEnabled: true,
-              autoSave: true,
-            },
-            dailyEvents: {
-              boss: false,
-              officeLady: false,
-              customer: false,
-            },
-          };
-          setGameState(newGameState);
-          saveGameState(newGameState);
+          const newGameState = createDefaultGameState(character);
+          const normalizedState = normalizeGameState(newGameState);
+          setGameState(normalizedState);
+          saveGameState(normalizedState);
           setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
           return;
         }
@@ -70,7 +55,7 @@ function App() {
       const savedState = loadGameState();
       if (savedState) {
         // 毎日のイベントをリセット
-        const resetState = resetDailyEvents(savedState);
+        const resetState = normalizeGameState(resetDailyEvents(savedState));
         setGameState(resetState);
         saveGameState(resetState);
         setCurrentScreen('home');
@@ -78,8 +63,9 @@ function App() {
         // セーブデータもない場合、デフォルトキャラクターで開始
         const defaultCharacter = createDefaultCharacter();
         const newGameState = createDefaultGameState(defaultCharacter);
-        setGameState(newGameState);
-        saveGameState(newGameState);
+        const normalizedState = normalizeGameState(newGameState);
+        setGameState(normalizedState);
+        saveGameState(normalizedState);
         setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
       }
     };
@@ -132,37 +118,40 @@ function App() {
         <EventScreen 
           gameState={gameState} 
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            const normalizedState = normalizeGameState(newGameState);
+            setGameState(normalizedState);
+            saveGameState(normalizedState);
+          }}
         />
       )}
       {currentScreen === 'shop' && (
         <ShopScreen 
           gameState={gameState} 
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            const normalizedState = normalizeGameState(newGameState);
+            setGameState(normalizedState);
+            saveGameState(normalizedState);
+          }}
         />
       )}
       {currentScreen === 'formation' && (
         <FormationScreen 
           gameState={gameState} 
           onGameStateUpdate={(newGameState) => {
-            setGameState(newGameState);
-            saveGameState(newGameState);
-          }} 
+            const normalizedState = normalizeGameState(newGameState);
+            setGameState(normalizedState);
+            saveGameState(normalizedState);
+          }}
         />
       )}
       {currentScreen === 'settings' && (
         <SettingsScreen 
           settings={gameState.settings} 
           onSettingsUpdate={(newSettings) => {
-            const newGameState = { ...gameState, settings: newSettings };
+            const newGameState = normalizeGameState({ ...gameState, settings: newSettings });
             setGameState(newGameState);
             saveGameState(newGameState);
-          }} 
+          }}
         />
       )}
 
