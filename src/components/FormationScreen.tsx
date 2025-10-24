@@ -234,7 +234,7 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
         {/* 連隊編成 */}
         <div className="bg-white rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-bold mb-4 text-gray-800">連隊編成</h2>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {formationSlots.map((slot, index) => {
               const character = getCharacterInSlot(slot);
               const isActive = activeSlot === index;
@@ -243,42 +243,43 @@ const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStat
                 <div
                   key={index}
                   onClick={() => selectSlot(index)}
-                  className={`flex flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all cursor-pointer min-w-[200px] ${
+                  className={`relative flex h-32 flex-col items-center justify-center gap-3 rounded-2xl border-2 p-4 text-center transition-all cursor-pointer ${
                     isActive
                       ? 'border-blue-500 bg-blue-50 shadow-lg'
                       : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow'
                   }`}
                 >
-                  <div className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  <span className="absolute left-3 top-3 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                     連隊{index + 1}
-                  </div>
-                  <div className="flex h-24 w-24 items-center justify-center">
+                  </span>
+                  <div className="flex h-16 w-16 items-center justify-center">
                     {character ? (
                       <CharacterAvatar character={character} size="medium" />
                     ) : (
-                      <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-2xl text-gray-300">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-2xl text-gray-300">
                         +
                       </div>
                     )}
                   </div>
                   {character ? (
                     <>
-                      <div>
-                        <div className="text-sm font-bold text-gray-800">{character.name}</div>
-                        <div className="text-xs text-gray-500">Lv.{character.level}</div>
+                      <div className="mt-1 max-w-[5rem] truncate text-xs font-semibold text-gray-700">
+                        {character.name}
                       </div>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           removeSlot(index);
                         }}
-                        className="text-xs font-semibold text-blue-600 underline-offset-2 transition hover:underline"
+                        className="absolute right-3 top-3 rounded-full bg-white/80 px-1 text-xs font-bold text-blue-500 shadow-sm transition hover:bg-blue-500 hover:text-white"
+                        aria-label="枠を空にする"
                       >
-                        枠を空にする
+                        ×
                       </button>
                     </>
                   ) : (
-                    <p className="text-xs text-gray-500">メンバー未設定</p>
+                    <p className="text-[11px] text-gray-400">タップで配置</p>
                   )}
                 </div>
               );
