@@ -23,6 +23,8 @@ export interface Character {
 
 export interface GameState {
   character: Character;
+  ownedCharacters: Character[];
+  buyableCharacters: Character[];
   money: number;
   lastPlayDate: string;
   events: string[];
@@ -33,6 +35,7 @@ export interface GameState {
     officeLady: boolean;
     customer: boolean;
   };
+  formation?: string[];
 }
 
 export interface Achievement {

@@ -1,4 +1,5 @@
 import { GameState, Character } from '../types/character';
+import { getInitialBuyableCharacters, cloneCharacter } from '../data/characterCatalog';
 
 const STORAGE_KEY = 'shachipoke-game-state';
 
@@ -10,11 +11,52 @@ export const saveGameState = (gameState: GameState): void => {
   }
 };
 
+export const normalizeGameState = (state: any): GameState => {
+  const baseCharacter: Character = state.character ? cloneCharacter(state.character) : createDefaultCharacter();
+
+  const existingOwned: Character[] = Array.isArray(state.ownedCharacters) && state.ownedCharacters.length > 0
+    ? state.ownedCharacters.map((character: Character) => cloneCharacter(character))
+    : [];
+
+  const ownedCharacters: Character[] = (() => {
+    const updated = existingOwned.map((character) =>
+      character.id === baseCharacter.id ? baseCharacter : character
+    );
+
+    if (!updated.some((character) => character.id === baseCharacter.id)) {
+      updated.unshift(baseCharacter);
+    }
+
+    return updated;
+  })();
+
+  const ownedIds = new Set(ownedCharacters.map((character) => character.id));
+
+  const buyableCharacters: Character[] = Array.isArray(state.buyableCharacters)
+    ? state.buyableCharacters
+        .map((character: Character) => cloneCharacter(character))
+        .filter((character: Character) => !ownedIds.has(character.id))
+    : getInitialBuyableCharacters().filter((character: Character) => !ownedIds.has(character.id));
+
+  const formation = Array.isArray(state.formation)
+    ? [...state.formation]
+    : [];
+
+  return {
+    ...state,
+    character: baseCharacter,
+    ownedCharacters,
+    buyableCharacters,
+    formation,
+  };
+};
+
 export const loadGameState = (): GameState | null => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return normalizeGameState(parsed);
     }
   } catch (error) {
     console.error('Failed to load game state:', error);
@@ -84,8 +126,11 @@ export const createDefaultCharacter = (): Character => {
 };
 
 export const createDefaultGameState = (character: Character): GameState => {
-  return {
-    character,
+  const baseCharacter = cloneCharacter(character);
+  const initialState: GameState = {
+    character: baseCharacter,
+    ownedCharacters: [baseCharacter],
+    buyableCharacters: getInitialBuyableCharacters(),
     money: 50,
     lastPlayDate: new Date().toISOString(),
     events: [],
@@ -101,7 +146,10 @@ export const createDefaultGameState = (character: Character): GameState => {
       officeLady: false,
       customer: false,
     },
+    formation: [],
   };
+
+  return normalizeGameState(initialState);
 };
 
 // URLパラメータからキャラクター情報を取得（旧バージョン対応）
