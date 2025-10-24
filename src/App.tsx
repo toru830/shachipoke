@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GameState } from './types/character';
 import { 
   loadGameState, 
@@ -23,18 +23,15 @@ type Screen = 'intro' | 'welcome' | 'home' | 'event' | 'shop' | 'formation' | 's
 function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>('intro');
+  const [postIntroScreen, setPostIntroScreen] = useState<Screen>('welcome');
 
   useEffect(() => {
     const initGame = () => {
       console.log('App.tsx - initGame started');
-      // イントロ動画を見たかどうかを確認
-      const hasSeenIntro = localStorage.getItem('shachipoke_intro_seen') === 'true';
-      console.log('App.tsx - hasSeenIntro:', hasSeenIntro);
-      
       // まずURLパラメータから社畜診断のキャラクター情報を取得試行
       const diagnosisChar = getCharacterFromUrl();
       console.log('App.tsx - diagnosisChar:', diagnosisChar);
-      
+
       if (diagnosisChar.characterId && diagnosisChar.characterName) {
         console.log('App.tsx - processing diagnosis character');
         const character = convertDiagnosisCharacterToCharacter(diagnosisChar);
@@ -45,7 +42,8 @@ function App() {
           const normalizedState = normalizeGameState(newGameState);
           setGameState(normalizedState);
           saveGameState(normalizedState);
-          setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
+          setPostIntroScreen('welcome');
+          setCurrentScreen('intro');
           return;
         }
       }
@@ -58,7 +56,8 @@ function App() {
         const resetState = normalizeGameState(resetDailyEvents(savedState));
         setGameState(resetState);
         saveGameState(resetState);
-        setCurrentScreen('home');
+        setPostIntroScreen('home');
+        setCurrentScreen('intro');
       } else {
         // セーブデータもない場合、デフォルトキャラクターで開始
         const defaultCharacter = createDefaultCharacter();
@@ -66,10 +65,11 @@ function App() {
         const normalizedState = normalizeGameState(newGameState);
         setGameState(normalizedState);
         saveGameState(normalizedState);
-        setCurrentScreen(hasSeenIntro ? 'home' : 'intro');
+        setPostIntroScreen('welcome');
+        setCurrentScreen('intro');
       }
     };
-    
+
     initGame();
   }, []);
 
@@ -77,10 +77,9 @@ function App() {
     setCurrentScreen(screen);
   };
 
-  const completeIntro = () => {
-    localStorage.setItem('shachipoke_intro_seen', 'true');
-    setCurrentScreen('welcome');
-  };
+  const completeIntro = useCallback(() => {
+    setCurrentScreen(postIntroScreen);
+  }, [postIntroScreen]);
 
   const startGame = () => {
     setCurrentScreen('home');
