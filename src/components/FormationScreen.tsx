@@ -8,150 +8,175 @@ interface FormationScreenProps {
 }
 
 const FormationScreen: React.FC<FormationScreenProps> = ({ gameState, onGameStateUpdate }) => {
-  const [selectedFormation, setSelectedFormation] = useState<string>('balanced');
+  const [formationSlots, setFormationSlots] = useState<(string | null)[]>([null, null, null, null]);
+  const [activeSlot, setActiveSlot] = useState<number | null>(0);
 
-  const formations = [
-    {
-      id: 'balanced',
-      name: 'バランス型',
-      description: '全能力をバランスよく配置',
-      icon: '⚖️',
-      stats: { stress: 0, communication: 0, endurance: 0, luck: 0 }
-    },
-    {
-      id: 'stress_focus',
-      name: 'ストレス耐性重視',
-      description: 'ストレス耐性を最大限に高める',
-      icon: '😤',
-      stats: { stress: 10, communication: -2, endurance: 5, luck: -3 }
-    },
-    {
-      id: 'communication_focus',
-      name: 'コミュニケーション重視',
-      description: 'コミュニケーション能力を強化',
-      icon: '💬',
-      stats: { stress: -3, communication: 10, endurance: 2, luck: 1 }
-    },
-    {
-      id: 'endurance_focus',
-      name: '持久力重視',
-      description: '長時間の作業に特化',
-      icon: '💪',
-      stats: { stress: 5, communication: -1, endurance: 10, luck: -4 }
-    },
-    {
-      id: 'luck_focus',
-      name: '運重視',
-      description: '運の良さを最大限に活用',
-      icon: '🍀',
-      stats: { stress: -5, communication: 3, endurance: -2, luck: 10 }
-    }
-  ];
+  const ownedCharacters = [gameState.character];
 
-  const handleFormationChange = (formationId: string) => {
-    setSelectedFormation(formationId);
+  const selectSlot = (index: number) => {
+    setActiveSlot(index);
+  };
+
+  const assignCharacterToSlot = (characterId: string) => {
+    if (activeSlot === null) return;
+
+    setFormationSlots(prev => {
+      const updated = [...prev];
+      // 既に他のスロットに配置されている場合は削除
+      const existingIndex = updated.findIndex(id => id === characterId);
+      if (existingIndex !== -1) {
+        updated[existingIndex] = null;
+      }
+      updated[activeSlot] = characterId;
+      return updated;
+    });
+  };
+
+  const removeSlot = (index: number) => {
+    setFormationSlots(prev => {
+      const updated = [...prev];
+      updated[index] = null;
+      return updated;
+    });
   };
 
   const applyFormation = () => {
-    const formation = formations.find(f => f.id === selectedFormation);
-    if (!formation) return;
+    const selectedIds = formationSlots.filter(id => id !== null) as string[];
+    if (selectedIds.length === 0) return;
 
-    const newGameState = { ...gameState };
-    
-    // フォーメーション効果を適用
-    Object.entries(formation.stats).forEach(([stat, value]) => {
-      if (value !== 0) {
-        newGameState.character = {
-          ...newGameState.character,
-          stats: {
-            ...newGameState.character.stats,
-            [stat]: Math.max(0, Math.min(100, newGameState.character.stats[stat as keyof typeof newGameState.character.stats] + value))
-          }
-        };
-      }
-    });
+    const updatedGameState = {
+      ...gameState,
+      formation: selectedIds,
+    };
 
-    onGameStateUpdate(newGameState);
+    onGameStateUpdate(updatedGameState);
+  };
+
+  const getCharacterInSlot = (slot: string | null) => {
+    if (!slot) return null;
+    return ownedCharacters.find((char: any) => char.id === slot);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">編成</h1>
-        
-        {/* 現在のキャラクター */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">現在のキャラクター</h2>
-          <div className="flex justify-center mb-4">
-            <CharacterAvatar character={gameState.character} size="large" />
-          </div>
-          <div className="text-center">
-            <h3 className="font-bold text-gray-800">{gameState.character.name}</h3>
-            <p className="text-sm text-gray-600">レベル {gameState.character.level}</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 pb-32">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          編成
+        </h1>
 
-        {/* フォーメーション選択 */}
-        <div className="space-y-3 mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">フォーメーション選択</h2>
-          {formations.map((formation) => (
-            <div
-              key={formation.id}
-              onClick={() => handleFormationChange(formation.id)}
-              className={`p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                selectedFormation === formation.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{formation.icon}</span>
-                <div className="flex-1">
-                  <h3 className="font-bold text-gray-800">{formation.name}</h3>
-                  <p className="text-sm text-gray-600">{formation.description}</p>
-                </div>
-                <div className="text-right">
-                  {selectedFormation === formation.id && (
-                    <span className="text-blue-500 text-lg">✓</span>
+        {/* 連隊編成 */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">連隊編成</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {formationSlots.map((slot, index) => {
+              const character = getCharacterInSlot(slot);
+              const isActive = activeSlot === index;
+              
+              return (
+                <div
+                  key={index}
+                  onClick={() => selectSlot(index)}
+                  className={`flex flex-col items-center gap-3 rounded-2xl border-2 p-4 text-center transition-all cursor-pointer min-w-[200px] ${
+                    isActive
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow'
+                  }`}
+                >
+                  <div className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                    連隊{index + 1}
+                  </div>
+                  <div className="flex h-24 w-24 items-center justify-center">
+                    {character ? (
+                      <CharacterAvatar character={character} size="medium" />
+                    ) : (
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-2xl text-gray-300">
+                        +
+                      </div>
+                    )}
+                  </div>
+                  {character ? (
+                    <>
+                      <div>
+                        <div className="text-sm font-bold text-gray-800">{character.name}</div>
+                        <div className="text-xs text-gray-500">Lv.{character.level}</div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeSlot(index);
+                        }}
+                        className="text-xs font-semibold text-blue-600 underline-offset-2 transition hover:underline"
+                      >
+                        枠を空にする
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-500">メンバー未設定</p>
                   )}
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
         </div>
 
-        {/* 現在の統計値 */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
-          <h3 className="font-bold text-gray-800 mb-3">現在の統計値</h3>
-          <div className="space-y-2">
-            {Object.entries(gameState.character.stats).map(([stat, value]) => (
-              <div key={stat} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  {stat === 'stress' ? 'ストレス耐性' :
-                   stat === 'communication' ? 'コミュニケーション' :
-                   stat === 'endurance' ? '持久力' : '運'}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${value}%` }}
-                    ></div>
+        {/* 保有キャラクター */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">保有キャラクター</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {ownedCharacters.map((character: any) => {
+              const inFormation = formationSlots.includes(character.id);
+              return (
+                <div
+                  key={character.id}
+                  className={`flex flex-col gap-3 rounded-2xl border p-4 transition ${
+                    inFormation ? 'border-purple-400 bg-purple-50' : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <CharacterAvatar character={character} size="small" />
+                    <div>
+                      <div className="text-sm font-bold text-gray-800">{character.name}</div>
+                      <div className="text-xs text-gray-500">Lv.{character.level}</div>
+                    </div>
                   </div>
-                  <span className="text-sm font-medium w-8">{value}</span>
+                  <div className="flex flex-wrap gap-2 text-[11px] text-gray-500">
+                    <span className="bg-gray-100 px-2 py-1 rounded-full">
+                      ☹️ {character.stats.stress}
+                    </span>
+                    <span className="bg-gray-100 px-2 py-1 rounded-full">
+                      💬 {character.stats.communication}
+                    </span>
+                    <span className="bg-gray-100 px-2 py-1 rounded-full">
+                      💪 {character.stats.endurance}
+                    </span>
+                    <span className="bg-gray-100 px-2 py-1 rounded-full">
+                      🍀 {character.stats.luck}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => assignCharacterToSlot(character.id)}
+                    disabled={activeSlot === null}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeSlot === null
+                        ? 'bg-gray-200 text-gray-400'
+                        : 'bg-purple-500 text-white hover:bg-purple-600'
+                    }`}
+                  >
+                    {inFormation ? '配置し直す' : '連隊に編成'}
+                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* 適用ボタン */}
-        <div className="text-center">
+        <div className="flex justify-end">
           <button
             onClick={applyFormation}
             className="bg-blue-500 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-600 transition-colors"
           >
-            フォーメーションを適用
+            編成を保存
           </button>
         </div>
       </div>

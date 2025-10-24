@@ -9,12 +9,16 @@ interface HomeProps {
 const Home = ({ character, money }: HomeProps) => {
   const expPercent = Math.min(100, Math.max(0, (character.exp / character.expToNextLevel) * 100));
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-32 overflow-y-auto">
       <div className="max-w-md mx-auto">
         {/* ヘッダー */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">シャチポケ</h1>
-          <p className="text-gray-600">社畜育成ゲーム</p>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">シャチポケ</h1>
+          <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full shadow-sm text-sm font-semibold">
+            <span className="text-lg">💰</span>
+            <span>{money}</span>
+            <span className="text-xs text-gray-500">シャチ</span>
+          </div>
         </div>
 
         {/* 中央に大きなキャラクター */}
@@ -44,13 +48,6 @@ const Home = ({ character, money }: HomeProps) => {
           </div>
         </div>
 
-        {/* お金の表示 */}
-        <div className="mt-4 text-center">
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 px-6 py-3 rounded-full inline-flex items-center gap-2 shadow-md">
-            <span className="text-xl">💰</span>
-            <span className="font-bold text-lg">${money} シャチ</span>
-          </div>
-        </div>
 
         {/* ステータス（下部） */}
         <div className="mt-6 bg-gradient-to-br from-white to-purple-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
@@ -60,32 +57,20 @@ const Home = ({ character, money }: HomeProps) => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-pink-50 p-3 rounded-xl">
-              <span className="text-3xl">😤</span>
-              <div>
-                <div className="text-sm text-gray-600 font-medium">ストレス耐性</div>
-                <div className="font-bold text-lg text-red-600">{character.stats.stress}</div>
-              </div>
+              <span className="text-3xl">☹️</span>
+              <div className="font-bold text-lg text-red-600">{character.stats.stress}</div>
             </div>
             <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-xl">
               <span className="text-3xl">💬</span>
-              <div>
-                <div className="text-sm text-gray-600 font-medium">コミュ力</div>
-                <div className="font-bold text-lg text-blue-600">{character.stats.communication}</div>
-              </div>
+              <div className="font-bold text-lg text-blue-600">{character.stats.communication}</div>
             </div>
             <div className="flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-xl">
               <span className="text-3xl">💪</span>
-              <div>
-                <div className="text-sm text-gray-600 font-medium">持久力</div>
-                <div className="font-bold text-lg text-green-600">{character.stats.endurance}</div>
-              </div>
+              <div className="font-bold text-lg text-green-600">{character.stats.endurance}</div>
             </div>
             <div className="flex items-center gap-3 bg-gradient-to-r from-yellow-50 to-orange-50 p-3 rounded-xl">
               <span className="text-3xl">🍀</span>
-              <div>
-                <div className="text-sm text-gray-600 font-medium">運</div>
-                <div className="font-bold text-lg text-yellow-600">{character.stats.luck}</div>
-              </div>
+              <div className="font-bold text-lg text-yellow-600">{character.stats.luck}</div>
             </div>
           </div>
         </div>

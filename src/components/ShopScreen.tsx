@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types/character';
 import { getShopItemsByCategory, ShopItem } from '../data/shopItems';
-import { spendMoney, updateStat, addExp } from '../utils/gameLogic';
+import { spendMoney, updateStat } from '../utils/gameLogic';
 
 interface ShopScreenProps {
   gameState: GameState;
@@ -19,122 +19,140 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ gameState, onGameStateUpdate })
     { id: 'training' as const, name: '研修', icon: '📚' },
   ];
 
+  const showMessage = (text: string) => {
+    setMessage(text);
+    setTimeout(() => setMessage(''), 3000);
+  };
+
   const handlePurchase = (item: ShopItem) => {
     if (gameState.money < item.price) {
-      setMessage('お金が足りません！');
-      setTimeout(() => setMessage(''), 3000);
+      showMessage('お金が足りません！');
       return;
     }
 
-    let newGameState = spendMoney(gameState, item.price);
-    if (!newGameState) {
-      setMessage('購入に失敗しました！');
-      setTimeout(() => setMessage(''), 3000);
+    const spentState = spendMoney(gameState, item.price);
+    if (!spentState) {
+      showMessage('お金が足りません！');
       return;
     }
 
-    // アイテムの効果を適用
-    if (item.effects.stats) {
-      Object.entries(item.effects.stats).forEach(([stat, value]) => {
-        if (value !== undefined) {
-          newGameState.character = updateStat(
-            newGameState.character,
-            stat as keyof typeof newGameState.character.stats,
-            value
-          );
+    let updatedState = { ...spentState };
+
+    // ステータス効果を適用
+    if (item.effects) {
+      Object.entries(item.effects).forEach(([stat, value]) => {
+        if (typeof value === 'number' && value > 0) {
+          updatedState.character = updateStat(updatedState.character, stat as keyof typeof gameState.character.stats, value);
         }
       });
     }
 
-    if (item.effects.exp) {
-      newGameState.character = addExp(newGameState.character, item.effects.exp);
-    }
-
-    onGameStateUpdate(newGameState);
-    setMessage(`${item.name}を購入しました！`);
-    setTimeout(() => setMessage(''), 3000);
+    onGameStateUpdate(updatedState);
+    showMessage(`${item.name}を購入しました！`);
   };
 
-  const filteredItems = getShopItemsByCategory(selectedCategory);
+  const shopItems = getShopItemsByCategory(selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-4 pb-20">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">ショップ</h1>
-        
-        {/* お金の表示 */}
-        <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4 w-full justify-center">
-          <span className="text-lg">💰</span>
-          <span className="font-bold">${gameState.money} シャチ</span>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 pb-32 overflow-y-auto">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+          ショップ
+        </h1>
 
-        {/* カテゴリ選択 */}
-        <div className="flex gap-2 mb-4 overflow-x-auto">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                selectedCategory === category.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <span>{category.icon}</span>
-              <span className="text-sm">{category.name}</span>
-            </button>
-          ))}
+        {/* お金表示 */}
+        <div className="bg-white rounded-2xl p-4 mb-6 shadow-lg">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-2xl">💰</span>
+            <span className="text-2xl font-bold text-gray-800">{gameState.money}</span>
+            <span className="text-lg text-gray-600">シャチ</span>
+          </div>
         </div>
 
         {/* メッセージ */}
         {message && (
-          <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg mb-4 text-center">
+          <div className="bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg mb-6 text-center">
             {message}
           </div>
         )}
 
-        {/* アイテムリスト */}
-        <div className="space-y-3">
-          {filteredItems.map((item) => (
-            <div key={item.id} className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-2xl">{item.icon}</span>
-                    <h3 className="font-bold text-gray-800">{item.name}</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                  
-                  {/* 効果の表示 */}
-                  <div className="text-xs text-gray-500">
-                    {item.effects.stats && Object.entries(item.effects.stats).map(([stat, value]) => (
-                      <span key={stat} className="mr-2">
-                        {stat}: {value > 0 ? '+' : ''}{value}
-                      </span>
-                    ))}
-                    {item.effects.exp && (
-                      <span className="mr-2">EXP: +{item.effects.exp}</span>
-                    )}
+        {/* カテゴリ選択 */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">カテゴリ</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-colors ${
+                  selectedCategory === category.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-2xl">{category.icon}</span>
+                <span className="font-semibold text-gray-800">{category.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 商品一覧 */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">
+            {categories.find(c => c.id === selectedCategory)?.name}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {shopItems.map((item) => (
+              <div
+                key={item.id}
+                className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-3xl">{item.icon}</span>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-800 mb-1">{item.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                    <div className="text-lg font-bold text-green-600">💰 {item.price}</div>
                   </div>
                 </div>
                 
-                <div className="text-right">
-                  <div className="text-lg font-bold text-blue-600">${item.price}</div>
-                  <button
-                    onClick={() => handlePurchase(item)}
-                    disabled={gameState.money < item.price}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      gameState.money >= item.price
-                        ? 'bg-blue-500 text-white hover:bg-blue-600'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    購入
-                  </button>
-                </div>
+                {/* 効果表示 */}
+                {item.effects && (
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-gray-500 mb-1">効果:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {Object.entries(item.effects).map(([stat, value]) => (
+                        <span
+                          key={stat}
+                          className="bg-gray-100 px-2 py-1 rounded-full text-xs"
+                        >
+                          {stat === 'stress' && '☹️'}
+                          {stat === 'communication' && '💬'}
+                          {stat === 'endurance' && '💪'}
+                          {stat === 'luck' && '🍀'}
+                          {typeof value === 'number' && value > 0 ? '+' : ''}{typeof value === 'number' ? value : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+
+                <button
+                  onClick={() => handlePurchase(item)}
+                  disabled={gameState.money < item.price}
+                  className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
+                    gameState.money >= item.price
+                      ? 'bg-green-500 text-white hover:bg-green-600'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  購入
+                </button>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

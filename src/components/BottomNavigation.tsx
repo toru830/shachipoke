@@ -9,11 +9,11 @@ interface BottomNavigationProps {
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentScreen, onNavigate }) => {
   const navItems = [
-    { id: 'home' as Screen, label: 'ホーム', icon: '🏠' },
-    { id: 'event' as Screen, label: 'イベント', icon: '📅' },
-    { id: 'shop' as Screen, label: 'ショップ', icon: '🛒' },
-    { id: 'formation' as Screen, label: '編成', icon: '👥' },
-    { id: 'settings' as Screen, label: '設定', icon: '⚙️' },
+    { id: 'home' as Screen, icon: '🏠' },
+    { id: 'event' as Screen, icon: '📅' },
+    { id: 'shop' as Screen, icon: '🛒' },
+    { id: 'formation' as Screen, icon: '👥' },
+    { id: 'settings' as Screen, icon: '⚙️' },
   ];
 
   return (
@@ -23,14 +23,13 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentScreen, onNa
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+            className={`flex items-center justify-center py-3 px-4 rounded-lg transition-colors ${
               currentScreen === item.id
                 ? 'bg-blue-100 text-blue-600'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <span className="text-xl mb-1">{item.icon}</span>
-            <span className="text-xs font-medium">{item.label}</span>
+            <span className="text-2xl">{item.icon}</span>
           </button>
         ))}
       </div>
