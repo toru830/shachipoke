@@ -113,7 +113,7 @@ export function convertDiagnosisCharacterToCharacter(diagnosisChar: DiagnosisCha
   return {
     id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     name: diagnosisChar.characterName,
-    type: '診断結果',
+    type: '',
     level: 1,
     exp: 0,
     expToNextLevel: 100,

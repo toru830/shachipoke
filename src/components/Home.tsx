@@ -9,9 +9,9 @@ interface HomeProps {
 const Home = ({ character, money }: HomeProps) => {
   const expPercent = Math.min(100, Math.max(0, (character.exp / character.expToNextLevel) * 100));
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-32">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4 pb-32 overflow-y-auto">
       <div className="max-w-md mx-auto space-y-6">
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-center gap-4">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">シャチポケ</h1>
           <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full shadow-sm text-[11px] font-semibold">
             <span className="text-base">💰</span>
@@ -58,7 +58,7 @@ const Home = ({ character, money }: HomeProps) => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             {[{
-              label: 'ストレス耐性',
+              label: '耐ストレス',
               value: character.stats.stress,
               icon: '☹️',
               color: 'text-rose-600',

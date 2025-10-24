@@ -31,11 +31,11 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
     });
     
     return (
-      <div className={baseClasses} style={style}>
+      <div className={`${baseClasses} animate-pulse`} style={style}>
         <img 
           src={imagePath}
           alt={character.name}
-          className="w-full h-full object-contain drop-shadow-lg"
+          className="w-full h-full object-contain drop-shadow-lg transform scale-110 hover:scale-125 transition-transform duration-300"
           onLoad={() => console.log('Image loaded successfully:', imagePath)}
           onError={(e) => {
             console.error('Failed to load character image:', imagePath);
@@ -44,7 +44,7 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
             e.currentTarget.style.display = 'none';
             const parent = e.currentTarget.parentElement;
             if (parent) {
-              parent.innerHTML = `<div class="text-6xl drop-shadow-lg">${character.appearance.emoji || '🧑‍💼'}</div>`;
+              parent.innerHTML = `<div class="text-6xl drop-shadow-lg animate-pulse">${character.appearance.emoji || '🧑‍💼'}</div>`;
             }
           }}
         />
@@ -54,8 +54,8 @@ const CharacterAvatar = ({ character, size = 'medium', className = '', style }: 
 
   // 絵文字またはデフォルト絵文字を表示
   return (
-    <div className={baseClasses} style={style}>
-      <div className="text-6xl drop-shadow-lg">
+    <div className={`${baseClasses} animate-pulse`} style={style}>
+      <div className="text-6xl drop-shadow-lg transform scale-110 hover:scale-125 transition-transform duration-300">
         {character.appearance.emoji || '🧑‍💼'}
       </div>
     </div>
